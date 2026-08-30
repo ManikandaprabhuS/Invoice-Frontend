@@ -33,6 +33,7 @@ export class InvoiceList implements OnInit {
   customerPaymentFilter: '' | 'Online' | 'Cash' = '';
   customerDateFilter = '';
   showCustomerFilters = false;
+  mobileInvoiceSection: 'customer' | 'business' = 'customer';
   selectedCount = 0;
   editingInvoice: any = null;
   loadingInvoices = true;
@@ -134,6 +135,10 @@ export class InvoiceList implements OnInit {
     this.pageNumbers = Array.from({ length: this.totalPages }, (_, index) => index + 1);
     this.currentPage = 1;
     this.updatePage();
+  }
+
+  showMobileSection(section: 'customer' | 'business'): void {
+    this.mobileInvoiceSection = section;
   }
 
   calculateCustomerPagination() {
@@ -521,8 +526,7 @@ export class InvoiceList implements OnInit {
       this.alertService.success('Invoice updated successfully');
       this.editingInvoice = null;
       this.loadInvoices();
-    }).catch(err => {
-      console.error('Update failed', err);
+    }).catch(() => {
       this.alertService.error('Failed to update invoice');
     });
   }
@@ -537,8 +541,7 @@ export class InvoiceList implements OnInit {
     this.invoiceService.deleteInvoice(id).then(() => {
       this.alertService.success('Invoice deleted successfully');
       this.loadInvoices();
-    }).catch(err => {
-      console.error('Delete failed', err);
+    }).catch(() => {
       this.alertService.error('Failed to delete invoice');
     });
   }

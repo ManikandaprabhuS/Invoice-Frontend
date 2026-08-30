@@ -112,8 +112,7 @@ export class Overview implements OnInit, OnDestroy {
       this.applyPresetFilter(); // 🔹 APPLY DEFAULT FILTER (NOW CHART EXISTS)
 
 
-    } catch (err) {
-      console.error('Failed to load overview data', err);
+    } catch {
       this.loading = false;
     }
   }
@@ -398,7 +397,6 @@ export class Overview implements OnInit, OnDestroy {
       this.alertService.error('Please enter a reason for the expense');
       return;
     }
-    console.log('Adding expense:', this.expenseAmount, this.expenseReason);
     if (!this.expenseAmount || this.expenseAmount <= 0) {
       this.alertService.error('Please enter a valid expense amount.');
       return;
@@ -416,8 +414,7 @@ export class Overview implements OnInit, OnDestroy {
 
         this.loadDashboardData();
       },
-      error: (err) => {
-        console.error('Failed to add expense', err);
+      error: () => {
         this.alertService.error('Failed to add expense. Please try again.');
       }
     });
@@ -441,8 +438,7 @@ export class Overview implements OnInit, OnDestroy {
         this.resetIncomeForm();
         this.loadDashboardData();
       },
-      error: (err) => {
-        console.error('Failed to add income:', err);
+      error: () => {
         this.alertService.error('Failed to add income');
       }
     });

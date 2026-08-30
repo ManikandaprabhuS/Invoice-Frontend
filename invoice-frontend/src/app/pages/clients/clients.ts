@@ -44,8 +44,7 @@ export class Clients {
         this.setupPagination();
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Error fetching clients', err);
+      error: () => {
         this.loading = false;
       }
     });

@@ -50,8 +50,7 @@ export class ExpenseList implements OnInit {
       this.updateSummary();
       this.updatePagination();
 
-    } catch (err) {
-      console.error('Failed to load expenses', err);
+    } catch {
       this.expenses = [];
       this.filteredExpenses = [];
       this.updateSummary();
@@ -120,11 +119,9 @@ export class ExpenseList implements OnInit {
     }
     try {
       // Call your delete API with error handling
-      const response = await firstValueFrom(
+      await firstValueFrom(
         this.expenseService.deleteExpense(expenseId)
       );
-
-      console.log('Delete response:', response); // Check what backend returns
 
       // Remove from local arrays
       this.expenses = this.expenses.filter(e => e._id !== expenseId);
@@ -134,10 +131,6 @@ export class ExpenseList implements OnInit {
       this.alertService.success('Expense deleted successfully');
 
     } catch (err: any) {
-      console.error('Delete error details:', err);
-      console.error('Error status:', err.status);
-      console.error('Error message:', err.message);
-
       // Check if it's actually deleted despite the error
       if (err.status === 200 || err.status === 204) {
         // Sometimes DELETE returns 204 No Content which can be treated as error
