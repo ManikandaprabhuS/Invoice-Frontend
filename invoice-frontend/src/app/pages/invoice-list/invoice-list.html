@@ -1,0 +1,261 @@
+<div class="invoice-list-container">
+  <div class="header-section">
+    <h2 class="page-title">Invoices</h2>
+  </div>
+
+  <div class="invoice-sections">
+    <section class="invoice-section-card">
+      <div class="section-heading">
+        <div>
+          <h3>Customer Invoice Table</h3>
+          <p>Quick Add Income walk-in and customer entries</p>
+        </div>
+        <div class="section-actions">
+          <button class="filter-toggle-btn" type="button" [attr.aria-expanded]="showCustomerFilters"
+            (click)="showCustomerFilters = !showCustomerFilters">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+            Filter
+          </button>
+          <button class="section-export-btn" type="button" (click)="generateCustomerReport()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"></path></svg>
+            Generate Report
+          </button>
+        </div>
+      </div>
+
+      <div class="customer-filter-panel" *ngIf="showCustomerFilters">
+        <label>
+          <span>Mode of Payment</span>
+          <select [(ngModel)]="customerPaymentFilter" (ngModelChange)="applyCustomerFilter()">
+            <option value="">All Payments</option>
+            <option value="Online">Online</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </label>
+        <label>
+          <span>Date</span>
+          <input type="date" [(ngModel)]="customerDateFilter" (ngModelChange)="applyCustomerFilter()" />
+        </label>
+        <button class="clear-filter-btn" type="button" (click)="clearCustomerFilters()">Clear Filters</button>
+      </div>
+
+      <div class="skeleton-table-list" *ngIf="loadingCustomerInvoices" aria-label="Loading customer invoices">
+        <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4]">
+          <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4, 5]"></span>
+        </div>
+      </div>
+
+      <div class="table-container" *ngIf="!loadingCustomerInvoices && filteredCustomerInvoices.length">
+        <table class="invoice-table customer-invoice-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="invoice-row" *ngFor="let invoice of paginatedCustomerInvoices; trackBy: trackInvoice">
+              <td data-label="ID">{{ invoice._id | slice:-5 }}</td>
+              <td data-label="Customer"><span class="client-name">{{ invoice.clientName }}</span></td>
+              <td data-label="Service">{{ invoice.serviceType }}</td>
+              <td data-label="Amount"><span class="amount-cell">₹ {{ invoice.amount | number:'1.0-2' }}</span></td>
+              <td data-label="Payment"><span class="payment-pill">{{ invoice.modeOfPayment }}</span></td>
+              <td data-label="Date"><span class="date-cell">{{ invoice.createdAt | date:'dd MMM yyyy' }}</span></td>
+              <td data-label="Actions">
+                <div class="action-buttons">
+                  <button class="btn-view" type="button" (click)="viewCustomerInvoice(invoice)">View</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination-container" aria-label="Customer invoice pagination">
+          <button type="button" (click)="prevCustomerPage()" [disabled]="customerCurrentPage === 1"
+            class="btn-pagination pagination-nav">Previous</button>
+          <div class="page-numbers">
+            <button type="button" *ngFor="let page of customerPageNumbers" class="page-number"
+              [class.active]="page === customerCurrentPage" (click)="goToCustomerPage(page)">{{ page }}</button>
+          </div>
+          <button type="button" (click)="nextCustomerPage()" [disabled]="customerCurrentPage === customerTotalPages"
+            class="btn-pagination pagination-nav">Next</button>
+          <label class="page-size-control">
+            <span class="sr-only">Customer invoices per page</span>
+            <select [(ngModel)]="customerPageSize" (ngModelChange)="changeCustomerPageSize()">
+              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / page</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="empty-table" *ngIf="!loadingCustomerInvoices && !filteredCustomerInvoices.length">
+        No Quick Add Income customer entries found.
+      </div>
+    </section>
+
+    <section class="invoice-section-card">
+      <div class="section-heading">
+        <div>
+          <h3>Business Invoice Table</h3>
+          <p>Invoices created from the business invoice form</p>
+        </div>
+        <div class="section-actions">
+          <label class="search-field">
+            <span class="sr-only">Search business invoices</span>
+            <input class="table-filter business-table-filter" placeholder="Search with Client Name or Phone Number."
+              [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" />
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16.5 16.5 4 4"></path></svg>
+          </label>
+          <button class="section-export-btn" type="button" (click)="generateBusinessReport()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4M5 21h14"></path></svg>
+            Generate Report
+          </button>
+        </div>
+      </div>
+
+      <div class="skeleton-table-list" *ngIf="loadingInvoices" aria-label="Loading business invoices">
+        <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3, 4]">
+          <span class="skeleton skeleton-line" *ngFor="let cell of [1, 2, 3, 4, 5]"></span>
+        </div>
+      </div>
+
+      <div class="table-container" *ngIf="!loadingInvoices && filteredInvoices.length">
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Client Name</th>
+              <th>Phone Number</th>
+              <th>Total Amount</th>
+              <th>Received Amount</th>
+              <th>Balance Amount</th>
+              <th>Date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="invoice-row" *ngFor="let inv of paginatedInvoices; trackBy: trackInvoice">
+              <td data-label="ID">{{ inv._id | slice:-5 }}</td>
+              <td data-label="Client">
+                <span class="client-name" *ngIf="editingInvoice?._id !== inv._id">{{ inv.userName }}</span>
+                <input class="edit-input" *ngIf="editingInvoice?._id === inv._id" [(ngModel)]="editingInvoice.userName" />
+              </td>
+              <td data-label="Phone">
+                <span class="client-phone" *ngIf="editingInvoice?._id !== inv._id">{{ inv.phoneNumber }}</span>
+                <input class="edit-input" *ngIf="editingInvoice?._id === inv._id"
+                  [(ngModel)]="editingInvoice.phoneNumber" />
+              </td>
+              <td data-label="Total">
+                <span class="amount-cell" *ngIf="editingInvoice?._id !== inv._id">₹ {{ inv.totalAmount | number }}</span>
+                <input class="edit-input" type="number" *ngIf="editingInvoice?._id === inv._id"
+                  [(ngModel)]="editingInvoice.totalAmount" (ngModelChange)="updateEditingBalance()" />
+              </td>
+              <td data-label="Received">
+                <span class="amount-cell" *ngIf="editingInvoice?._id !== inv._id">₹ {{ inv.receivedAmount | number }}</span>
+                <input class="edit-input" type="number" *ngIf="editingInvoice?._id === inv._id"
+                  [(ngModel)]="editingInvoice.receivedAmount" (ngModelChange)="updateEditingBalance()" />
+              </td>
+              <td data-label="Balance">
+                <span class="amount-cell" [style.color]="(editingInvoice?._id === inv._id ? editingInvoice.balanceAmount : inv.balanceAmount) > 0 ? 'var(--accent-amber)' : 'inherit'">
+                  ₹ {{ (editingInvoice?._id === inv._id ? editingInvoice.balanceAmount : inv.balanceAmount) | number }}
+                </span>
+              </td>
+              <td data-label="Date"><span class="date-cell">{{ inv.createdAt | date:'dd MMM yyyy' }}</span></td>
+              <td data-label="Actions">
+                <div class="action-buttons">
+                  <button *ngIf="editingInvoice?._id !== inv._id" class="btn-view" type="button"
+                    (click)="viewBusinessInvoice(inv)">View</button>
+                  <button *ngIf="editingInvoice?._id !== inv._id" class="btn-action"
+                    (click)="editInvoice(inv)" title="Edit">✏️</button>
+                  <button *ngIf="editingInvoice?._id !== inv._id" class="btn-action danger"
+                    (click)="deleteInvoice(inv._id)" title="Delete">🗑️</button>
+                  <button *ngIf="editingInvoice?._id === inv._id" class="btn-action"
+                    (click)="saveEdit()" title="Save">✅</button>
+                  <button *ngIf="editingInvoice?._id === inv._id" class="btn-action danger"
+                    (click)="cancelEdit()" title="Cancel">❌</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination-container" aria-label="Business invoice pagination">
+          <button type="button" (click)="prevPage()" [disabled]="currentPage === 1"
+            class="btn-pagination pagination-nav">Previous</button>
+          <div class="page-numbers">
+            <button type="button" *ngFor="let page of pageNumbers" class="page-number"
+              [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+          </div>
+          <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
+            class="btn-pagination pagination-nav">Next</button>
+          <label class="page-size-control">
+            <span class="sr-only">Business invoices per page</span>
+            <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()">
+              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / page</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="empty-table" *ngIf="!loadingInvoices && !filteredInvoices.length">
+        No business invoices found.
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showPreview">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Business Invoice Preview</h3>
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="downloadPdf()">Download PDF</button>
+        <button class="btn-secondary" (click)="printInvoice()">Print</button>
+        <button class="btn-outline" (click)="closePreview()">Close</button>
+      </div>
+    </div>
+    <div class="missing-client-details"
+      *ngIf="!selectedInvoice?.gstNumber || !selectedInvoice?.emailId">
+      <div>
+        <strong>Complete Client Details</strong>
+        <p>This older invoice does not have GST or email information saved.</p>
+      </div>
+      <label>
+        <span>GST Number</span>
+        <input type="text" [(ngModel)]="selectedInvoice.gstNumber" maxlength="15"
+          placeholder="Enter client GST number" />
+      </label>
+      <label>
+        <span>Email ID</span>
+        <input type="email" [(ngModel)]="selectedInvoice.emailId"
+          placeholder="Enter client email address" />
+      </label>
+      <button class="btn-primary" type="button" (click)="savePreviewClientDetails()">Save Client Details</button>
+    </div>
+    <div id="invoice-pdf" class="invoice-pdf">
+      <app-invoice-template [invoice]="selectedInvoice"></app-invoice-template>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showCustomerPreview && selectedCustomerInvoice">
+  <div class="modal customer-preview-modal">
+    <div class="modal-header">
+      <h3>Customer Invoice Details</h3>
+      <button class="btn-outline" type="button" (click)="closeCustomerPreview()">Close</button>
+    </div>
+    <div class="customer-detail-grid">
+      <div><span>Customer</span><strong>{{ selectedCustomerInvoice.clientName }}</strong></div>
+      <div><span>Service</span><strong>{{ selectedCustomerInvoice.serviceType }}</strong></div>
+      <div><span>Amount</span><strong>₹ {{ selectedCustomerInvoice.amount | number:'1.0-2' }}</strong></div>
+      <div><span>Payment Mode</span><strong>{{ selectedCustomerInvoice.modeOfPayment }}</strong></div>
+      <div><span>Date</span><strong>{{ selectedCustomerInvoice.createdAt | date:'dd MMM yyyy, h:mm a' }}</strong></div>
+      <div><span>Record ID</span><strong>{{ selectedCustomerInvoice._id }}</strong></div>
+    </div>
+  </div>
+</div>

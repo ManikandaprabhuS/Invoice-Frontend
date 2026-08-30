@@ -1,0 +1,134 @@
+<div id="invoice-container" class="invoice-page" *ngIf="invoice">
+    <!-- Header Section -->
+    <div class="section header">
+        <div class="header-title">
+            <h1>Tax Invoice</h1>
+        </div>
+        <div class="header-content">
+            <div class="logo-box">
+                <!-- Placeholder for Logo -->
+                <!-- Logo Image -->
+                <img src="assets/logo.png" alt="Nomad Studio" class="logo-img" />
+                <span class="company-name">Nomad studio</span>
+            </div>
+            <div class="company-details">
+                <p><strong>{{invoice.ownerDetails?.ownerName || 'Suriya'}}</strong></p>
+                <p>{{invoice.ownerDetails?.address || 'Dharapuram Road, Oddanchatram-624619, Tamil Nadu'}}</p>
+                <p>Phone: 8015534983, 7598204583</p>
+                <p>Email: nomadstudioodc@gmail.com</p>
+                <p>GST No: 33KXVPS2471D1ZX</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill To & Invoice Details Section -->
+    <div class="section details-grid">
+        <div class="col-left">
+            <strong>Bill To:</strong>
+            <p class="client-name">{{invoice.userName}}</p>
+            <p>Contact No: {{invoice.phoneNumber}}</p>
+            <p *ngIf="invoice.invoiceType !== 'Customer'">GST No: {{invoice.gstNumber || '-'}}</p>
+            <p>Email: {{invoice.emailId || '-'}}</p>
+            <p>Address: {{invoice.address || '-'}}</p>
+        </div>
+        <div class="col-right">
+            <strong>Invoice Details:</strong>
+            <div class="detail-row">
+                <span>Invoice No:</span>
+                <span>{{invoice._id}}</span>
+            </div>
+            <div class="detail-row">
+                <span>Date:</span>
+                <span>{{invoice.createdAt | date:'dd/MM/yyyy'}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="section table-section">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-num">#</th>
+                    <th class="col-desc">Item name</th>
+                    <th class="col-hsn">HSN/SAC</th>
+                    <th class="col-qty">Quantity</th>
+                    <th class="col-price">Price/ unit(₹)</th>
+                    <th class="col-amount">Amount(₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of displayServices; let i = index; trackBy: trackServiceRow">
+                    <td class="col-num">{{ item.isEmpty ? '&nbsp;' : i + 1 }}</td>
+                    <td class="col-desc">{{ item.serviceType || '&nbsp;' }}</td>
+                    <!-- Schema doesn't have HSN, keeping empty column as per visual requirement -->
+                    <td class="col-hsn">&nbsp;</td>
+                    <td class="col-qty">{{ item.quantity || '&nbsp;' }}</td>
+                    <td class="col-price text-right">{{ item.pricePerUnit ? (item.pricePerUnit | number:'1.2-2') :
+                        '&nbsp;' }}</td>
+                    <td class="col-amount text-right">{{ item.amountCharged ? (item.amountCharged | number:'1.2-2') :
+                        '&nbsp;' }}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>Sub Total</strong></td>
+                    <td class="text-right">{{displaySubTotal | number:'1.2-2'}}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>CGST (9%)</strong></td>
+                    <td class="text-right">{{displayCgst | number:'1.2-2'}}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>SGST (9%)</strong></td>
+                    <td class="text-right">{{displaySgst | number:'1.2-2'}}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>Round Off</strong></td>
+                    <td class="text-right">{{displayRoundOff | number:'1.2-2'}}</td>
+                </tr>
+                <tr class="total-row-highlight">
+                    <td colspan="5" class="text-right"><strong>Total</strong></td>
+                    <td class="text-right"><strong>{{displayTotal | number:'1.2-2'}}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Additional Information (Amount in Words, Received, Balance) -->
+    <div class="section summary-section">
+        <div class="amount-words">
+            <strong>Invoice Amount in Words:</strong>
+            <p>{{amountInWords}}</p>
+        </div>
+        <div class="payment-details">
+            <div class="payment-row">
+                <span>Received:</span>
+                <span>{{invoice.receivedAmount | number:'1.2-2'}}</span>
+            </div>
+            <div class="payment-row">
+                <span>Payment Mode:</span>
+                <span>{{invoice.modeOfPayment || '-'}}</span>
+            </div>
+            <div class="payment-row">
+                <span>Balance:</span>
+                <span>{{invoice.balanceAmount | number:'1.2-2'}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Signature Section -->
+    <div class="section footer-section">
+        <div class="terms">
+            <strong>Terms & Conditions:</strong>
+            <p>Thanks for doing business with us!</p>
+        </div>
+        <div class="signature">
+            <p>For Nomad studio:</p>
+            <div class="signature-box">
+                <!-- Signature Image or Space -->
+            </div>
+            <p class="auth-sign">Authorized Signatory</p>
+        </div>
+    </div>
+</div>

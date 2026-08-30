@@ -1,0 +1,699 @@
+/* =========================================
+   OVERVIEW - DRIBBBLE INSPIRED REDESIGN
+   ========================================= */
+
+:host {
+  /* Colors */
+  --bg-dashboard: #F3F4F6;
+  --card-white: #FFFFFF;
+  --primary-brown: #8B5E3C;
+  --primary-hover: #6d4a2f;
+
+  --accent-green: #10B981;
+  /* Success / Income */
+  --accent-red: #EF4444;
+  /* Error / Expense */
+
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-light: #E5E7EB;
+
+  /* Shared Styles */
+  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  --card-radius: 16px;
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.overview-container,
+.overview-container * {
+  box-sizing: border-box;
+  /* 🔥 Force all elements to stay within bounds */
+}
+
+.overview-container {
+  padding: 16px 20px;
+  /* More compact padding */
+  background-color: var(--bg-dashboard);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  width: 100%;
+  max-width: 100vw;
+  height: 100%;
+  /* Restore fixed height for desktop */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Prevent desktop scroll */
+
+}
+
+@media (max-width: 1024px) {
+  .overview-container {
+    overflow-y: auto;
+    /* Enable scroll for tablet and mobile */
+    height: auto;
+    min-height: 100%;
+    display: block;
+    /* Allow natural flow for scrolling */
+    padding-bottom: 40px;
+  }
+}
+
+/* ================= HEADER ================= */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  /* reduced from 20px */
+}
+
+.page-title {
+  font-size: 22px;
+  /* reduced from 26px */
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card-white);
+  padding: 6px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.filter-bar select,
+.filter-bar input[type="date"] {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  outline: none;
+  padding: 8px;
+  width: auto;
+  min-width: 0;
+  /* Allow shrinking */
+  box-sizing: border-box;
+}
+
+.filter-bar select:focus,
+.filter-bar input:focus {
+  color: var(--primary-brown);
+}
+
+.to-separator {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ================= KPI CARDS ================= */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  /* reduced from 16px */
+  margin-bottom: 12px;
+  /* reduced from 20px */
+  flex-shrink: 0;
+}
+
+.stat-card {
+  background: var(--card-white);
+  padding: 12px 16px;
+  /* reduced from 20px 24px */
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  /* reduced lift */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  /* reduced from 20px */
+}
+
+.card-icon {
+  width: 32px;
+  /* reduced from 44px */
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  /* reduced from 20px */
+  transition: var(--transition-fast);
+}
+
+.stat-card .label {
+  font-size: 11px;
+  /* reduced from 13px */
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+
+.stat-card .value {
+  font-size: 24px;
+  /* reduced from 32px */
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+/* Specific Card Themes */
+.stat-card.clients .card-icon {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.stat-card.clients:hover {
+  border-color: #3B82F6;
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.1);
+}
+
+.stat-card.income .card-icon {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.stat-card.income .value {
+  color: var(--accent-green);
+}
+
+.stat-card.income:hover {
+  border-color: var(--accent-green);
+  box-shadow: 0 15px 35px rgba(16, 185, 129, 0.1);
+}
+
+.stat-card.received .card-icon {
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.stat-card.received:hover {
+  border-color: #14B8A6;
+  box-shadow: 0 15px 35px rgba(20, 184, 166, 0.1);
+}
+
+.stat-card.balance .card-icon {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.stat-card.balance .value {
+  color: var(--accent-red);
+}
+
+.stat-card.balance:hover {
+  border-color: var(--accent-red);
+  box-shadow: 0 15px 35px rgba(239, 68, 68, 0.1);
+}
+
+/* ================= BOTTOM CONTENT ================= */
+.overview-bottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  /* reduced from 20px */
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  /* Allow shrinking */
+}
+
+/* Chart Container */
+.chart-card {
+  background: var(--card-white);
+  padding: 16px;
+  /* reduced from 20px */
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Allow shrinking */
+}
+
+.chart-card h4 {
+  margin: 0 0 12px;
+  /* reduced from 16px */
+  font-size: 15px;
+  /* reduced from 16px */
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chart-wrapper {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* Expense Form */
+.expense-card {
+  background: var(--card-white);
+  padding: 16px 20px;
+  /* reduced from 24px */
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.expense-card h4 {
+  margin: 0 0 16px;
+  /* reduced from 24px */
+  font-size: 16px;
+  /* reduced from 18px */
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 12px;
+  /* reduced from 20px */
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-light);
+  background: #F9FAFB;
+  font-size: 15px;
+  transition: var(--transition-fast);
+  outline: none;
+  box-sizing: border-box;
+  /* 🔥 Fix overflow */
+}
+
+.form-group input:focus {
+  border-color: var(--primary-brown);
+  background: #FFF;
+  box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.05);
+}
+
+.expense-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--primary-brown);
+  color: #FFF;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  margin-top: 8px;
+}
+
+.expense-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 94, 60, 0.2);
+}
+
+.service-select {
+  width: 100% !important;
+  min-width: 80px !important;
+  padding: 10px !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  outline: none !important;
+  transition: var(--transition-fast) !important;
+  box-sizing: border-box !important;
+  background-color: white !important;
+  color: var(--text-primary) !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.service-select:focus {
+  border-color: var(--primary-brown) !important;
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1) !important;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1280px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .overview-bottom {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .overview-container {
+    padding: 12px;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .filter-bar {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px;
+    gap: 4px;
+    box-sizing: border-box;
+    border-radius: 12px;
+  }
+
+  .filter-bar select,
+  .filter-bar input[type="date"] {
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+    background: #F9FAFB;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .filter-bar .to-separator {
+    text-align: center;
+    padding: 2px 0;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-secondary);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-card .value {
+    font-size: 24px;
+  }
+
+  .chart-card,
+  .expense-card {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 0;
+    padding: 16px;
+    overflow-x: hidden;
+    /* 🔥 Final guard against right-side leak */
+  }
+
+  .chart-card {
+    min-height: 350px;
+  }
+
+  .expense-card h4 {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+}
+
+/* ================= QUICK ADD INCOME ================= */
+.income-card {
+  margin-top: 22px;
+  padding: 22px;
+  border: 1px solid #eadfd5;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff 0%, #fdfaf7 100%);
+  box-shadow: 0 10px 24px rgba(87, 55, 35, 0.08);
+}
+
+.income-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.income-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--primary-brown);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.income-card .income-card-header h4 {
+  margin: 0 0 5px;
+  color: var(--text-primary);
+  font-size: 19px;
+  text-transform: none;
+}
+
+.income-card-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.report-btn {
+  flex-shrink: 0;
+  padding: 9px 13px;
+  border: 1px solid #d8c4b4;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--primary-brown);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.report-btn:hover {
+  border-color: var(--primary-brown);
+  background: #fef7f1;
+}
+
+.quick-income-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.income-card .form-group {
+  min-width: 0;
+  margin: 0;
+}
+
+.income-card .form-group > label {
+  display: block;
+  margin-bottom: 7px;
+  color: #5f5147;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.income-card .form-group > label span {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.income-card .form-group > input,
+.income-card .form-group > select {
+  width: 100%;
+  height: 43px;
+  padding: 0 12px;
+  border: 1px solid #ded7d1;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: var(--transition-fast);
+}
+
+.income-card .form-group > input:focus,
+.income-card .form-group > select:focus {
+  border-color: var(--primary-brown);
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1);
+}
+
+.payment-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-height: 43px;
+  align-items: center;
+}
+
+.payment-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #5f5147;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payment-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--primary-brown);
+  cursor: pointer;
+}
+
+.income-submit-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary-brown);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.income-submit-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.income-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .quick-income-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .income-card {
+    padding: 16px;
+  }
+
+  .income-card-header {
+    flex-direction: column;
+  }
+
+  .report-btn {
+    width: 100%;
+  }
+}
+
+/* Dashboard loading skeletons */
+.overview-skeleton {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.skeleton-stat-card,
+.skeleton-form-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--card-radius);
+  background: var(--card-white);
+}
+
+.skeleton-value { width: 58%; height: 28px; }
+.skeleton-overview-bottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 260px;
+}
+.skeleton-chart { min-height: 300px; border-radius: var(--card-radius); }
+.skeleton-input { width: 100%; height: 42px; }
+.skeleton-input.tall { height: 120px; }
+.skeleton-button { width: 100%; height: 44px; }
+
+@media (max-width: 1280px) {
+  .skeleton-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1100px) {
+  .skeleton-overview-bottom { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .skeleton-stats-grid { grid-template-columns: 1fr; }
+  .skeleton-chart { min-height: 280px; }
+}
+
+@media (max-width: 480px) {
+  .overview-container { padding: 10px; }
+  .page-title { font-size: 20px; }
+  .stat-card,
+  .chart-card,
+  .expense-card,
+  .income-card { padding: 14px; }
+  .payment-checkboxes { grid-template-columns: 1fr 1fr; gap: 10px; }
+}

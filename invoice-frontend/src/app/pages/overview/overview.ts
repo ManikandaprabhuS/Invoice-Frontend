@@ -1,0 +1,580 @@
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Invoice } from '../service/invoice';
+import { CommonModule } from '@angular/common';
+import { Client } from '../service/client';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { FormsModule } from '@angular/forms';
+import { Expense } from '../service/expense';
+import { Chart } from 'chart.js/auto';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { AlertService } from '../service/alert.service';
+import { ServiceCatalog, ServiceType } from '../service/service-catalog';
+import { PaymentMode, QuickAddIncomeRecord, QuickAddIncomeService } from '../service/quick-add-income';
+
+
+@Component({
+  selector: 'app-overview',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './overview.html',
+  styleUrl: './overview.css',
+})
+export class Overview implements OnInit, OnDestroy {
+
+  // ================= EXISTING =================
+  totalClients = 0;
+  totalIncome = 0;
+  totalReceived = 0;
+  totalBalance = 0;
+  loading = true;
+
+  expenseAmount: number = 0;
+  expenseReason: string = '';
+
+  // Quick Income Form Properties
+  incomeServiceType: string = '';
+  incomeAmount: number = 0;
+  incomeClientName: string = 'Walk-in Customer';
+  incomePaymentMode: PaymentMode | '' = '';
+  serviceTypes: ServiceType[] = [];
+  quickAddIncomeRecords: QuickAddIncomeRecord[] = [];
+
+  @ViewChild('incomeChart') incomeChartRef!: ElementRef<HTMLCanvasElement>;
+  chart: Chart | null = null;
+  allExpenses: any[] = [];
+
+  constructor(
+    private invoiceService: Invoice,
+    private clientService: Client,
+    private expenseService: Expense,
+    private cdr: ChangeDetectorRef,
+    private alertService: AlertService,
+    private serviceCatalog: ServiceCatalog,
+    private quickAddIncomeService: QuickAddIncomeService
+  ) { }
+
+  // ================= NEW (FILTER SUPPORT) =================
+  selectedFilter: 'today' | 'week' | 'month' | 'year' = 'today';
+  chartFilter: 'daily' | 'weekly' | 'monthly' = 'daily';
+
+  fromDate: string | null = null;
+  toDate: string | null = null;
+
+  allInvoices: any[] = [];   // backup (DO NOT REMOVE)
+  allClients: any[] = [];    // backup for filtering
+
+
+  // ================= LIFECYCLE =================
+  ngOnInit(): void {
+    this.loadServices();
+    this.loadDashboardData();
+  }
+
+  ngOnDestroy(): void {
+    this.chart?.destroy();
+    this.chart = null;
+  }
+
+  loadServices(): void {
+    this.serviceCatalog.getServices().subscribe({
+      next: services => this.serviceTypes = services,
+      error: () => this.alertService.error('Failed to load services')
+    });
+  }
+
+
+  // ================= EXISTING METHOD (UNCHANGED LOGIC) =================
+  async loadDashboardData() {
+    try {
+      const [clients, expense, quickAddIncomes, invoices] = await Promise.all([
+        firstValueFrom(this.clientService.getAllClients()),
+        firstValueFrom(this.expenseService.getExpenses()),
+        firstValueFrom(this.quickAddIncomeService.getIncomes()),
+        this.invoiceService.getInvoices()
+      ]);
+      this.quickAddIncomeRecords = quickAddIncomes;
+      this.allExpenses = expense;
+
+      this.allInvoices = [
+        ...invoices,
+        ...quickAddIncomes.map(income => ({
+          ...income,
+          totalAmount: income.amount,
+          receivedAmount: income.amount,
+          balanceAmount: 0
+        }))
+      ]; // dashboard income sources
+      this.allClients = clients;   // backup
+      this.totalClients=clients.length;
+
+
+      this.loading = false;
+      this.cdr.detectChanges(); // 🔹 FORCE RENDER for canvas
+      this.applyPresetFilter(); // 🔹 APPLY DEFAULT FILTER (NOW CHART EXISTS)
+
+
+    } catch (err) {
+      console.error('Failed to load overview data', err);
+      this.loading = false;
+    }
+  }
+
+  // ================= PRESET FILTER (Today / Week / Month / Year) =================
+  applyPresetFilter() {
+    this.fromDate = null;
+    this.toDate = null;
+
+    const now = new Date();
+    let startDate = new Date();
+
+    switch (this.selectedFilter) {
+      case 'today':
+        startDate = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        break;
+
+      case 'week':
+        startDate = this.getStartOfWeek(now);
+        break;
+
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+
+      case 'year':
+        // 🔥 FIX: include previous year invoices
+        startDate = this.getStartOfFinancialYear(now);
+        break;
+    }
+
+    // Map selectedFilter to chartFilter
+    if (this.selectedFilter === 'today') {
+      this.chartFilter = 'daily';
+    } else if (this.selectedFilter === 'week') {
+      this.chartFilter = 'weekly';
+    } else {
+      this.chartFilter = 'monthly'; // month or year
+    }
+
+    this.filterDashboardData(startDate, now);
+    this.updateChart();
+  }
+
+
+  // ================= CUSTOM DATE FILTER (CALENDAR) =================
+  applyCustomDateFilter() {
+    if (!this.fromDate || !this.toDate) return;
+
+    const from = new Date(this.fromDate);
+    const to = new Date(this.toDate);
+
+    // normalize end date (include full day)
+    to.setHours(23, 59, 59, 999);
+
+    this.filterDashboardData(from, to);
+    // For custom date, defaults to daily or monthly? Let's keep existing chart filter for now
+    // or maybe auto-detect range. Leaving as is to minimize complexity.
+    this.updateChart();
+  }
+
+
+  updateChart() {
+    const { start, end, formatLabel, increment } = this.getChartData(this.chartFilter);
+
+    // 1. Generate chronologically sorted labels
+    const labels: string[] = [];
+    let current = new Date(start);
+    // Safety break
+    let loops = 0;
+    while (current <= end && loops < 1000) {
+      labels.push(formatLabel(current));
+      increment(current);
+      loops++;
+    }
+
+    // 2. Aggregate data
+    const groupedIncome = this.groupByPeriod(this.allInvoices, formatLabel);
+    const groupedExpense = this.groupByPeriod(this.allExpenses, formatLabel);
+
+    // 3. Map sorted labels to data
+    const incomeData = labels.map(label => groupedIncome[label] || 0);
+    const expenseData = labels.map(label => groupedExpense[label] || 0);
+
+    this.renderChart(labels, incomeData, expenseData);
+  }
+
+  getChartData(period: 'daily' | 'weekly' | 'monthly') {
+    const end = new Date();
+    let start = new Date();
+    let formatLabel: (d: Date) => string = (d) => '';
+    let increment: (d: Date) => void = (d) => { };
+
+
+    if (period === 'daily') {
+      // Last 7 days
+      start.setDate(end.getDate() - 6);
+      formatLabel = (d) => d.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+      increment = (d) => d.setDate(d.getDate() + 1);
+    } else if (period === 'weekly') {
+      // Last 4 weeks
+      start.setDate(end.getDate() - 28);
+      formatLabel = (d) => `Week ${this.getWeekNumber(d)}`;
+      increment = (d) => d.setDate(d.getDate() + 7);
+    } else {
+      // Last 6 months
+      start.setMonth(end.getMonth() - 5);
+      start.setDate(1);
+      formatLabel = (d) => d.toLocaleString('default', { month: 'short', year: 'numeric' });
+      increment = (d) => d.setMonth(d.getMonth() + 1);
+    }
+
+    // Align start of week if needed? keeping simple for now
+
+    return { start, end, formatLabel, increment };
+  }
+
+  getWeekNumber(d: Date): number {
+    const date = new Date(d.getTime());
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    const week1 = new Date(date.getFullYear(), 0, 4);
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  }
+
+  renderChart(labels: string[], income: number[], expense: number[]) {
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    // Register plugin locally just for this chart or globally? 
+    // Let's register strictly for this chart via plugins array if possible, 
+    // or just assume global registration if we did Chart.register. 
+    // Chart.js 3+ supports local plugins array in config.
+
+    // We need to register it globally or passed in plugins array of chart constructor? 
+    // Actually passing it in 'plugins' array of the config object (not options.plugins) is the local way.
+
+    const ctx = this.incomeChartRef.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    this.chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Income',
+            data: income,
+            backgroundColor: '#10B981', // Emerald Green
+            borderColor: '#10B981',
+            borderWidth: 1,
+            borderRadius: 8,
+            barPercentage: 0.6,
+          },
+          {
+            label: 'Expense',
+            data: expense,
+            backgroundColor: '#EF4444', // Coral Red
+            borderColor: '#EF4444',
+            borderWidth: 1,
+            borderRadius: 8,
+            barPercentage: 0.6,
+          }
+        ]
+      },
+      plugins: [ChartDataLabels],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+
+        plugins: {
+          legend: { position: 'top' },
+          datalabels: {
+            anchor: 'end',
+            align: 'top',
+            formatter: (value) => {
+              if (!value) return '';
+              return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
+            },
+            font: {
+              weight: 600,
+              family: "'Inter', sans-serif",
+              size: 11
+            },
+            color: '#6B7280'
+          },
+          tooltip: {
+            enabled: false // 🔹 Disable tooltips
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: '#f0f0f0' },
+            ticks: {
+              callback: function (value, index, values) {
+                return '₹' + value;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  groupByPeriod(data: any[], formatLabel: (d: Date) => string) {
+    const result: Record<string, number> = {};
+
+    data.forEach(item => {
+      const date = new Date(item.createdAt || item.expenseDate); // Handle invoice or expense date
+      // We don't filter by date here strictly because we just want to create the map keys
+      // effectively, but valid check is good for performance
+
+      const key = formatLabel(date);
+      const amount = item.totalAmount || item.amount || 0;
+      result[key] = (result[key] || 0) + amount;
+    });
+
+    return result;
+  }
+
+
+  // ================= DATE HELPERS (ADDED) =================
+  getStartOfWeek(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 (Sun) → 6 (Sat)
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    return new Date(d.setDate(diff));
+  }
+
+  getStartOfFinancialYear(date: Date): Date {
+    // Financial year starts April 1 (India)
+    const year = date.getMonth() >= 3 ? date.getFullYear() : date.getFullYear() - 1;
+    return new Date(year, 3, 1);
+  }
+
+  // ================= COMMON FILTER METHOD =================
+
+  filterDashboardData(from: Date, to: Date) {
+    // 1. Filter Invoices
+    const filteredInvoices = this.allInvoices.filter((inv: any) => {
+      const created = new Date(inv.createdAt);
+      return created >= from && created <= to;
+    });
+
+    this.totalIncome = filteredInvoices.reduce(
+      (sum: number, i: any) => sum + (i.totalAmount || 0),
+      0
+    );
+
+    this.totalReceived = filteredInvoices.reduce(
+      (sum: number, i: any) => sum + (i.receivedAmount || 0),
+      0
+    );
+
+    this.totalBalance = filteredInvoices.reduce(
+      (sum: number, i: any) => sum + (i.balanceAmount || 0),
+      0
+    );
+
+  
+  }
+
+  addExpense() {
+    // Validate Expense Amount
+    if (!this.expenseAmount || this.expenseAmount <= 0) {
+      this.alertService.error('Please enter a valid expense amount');
+      return;
+    }
+
+    // Validate Reason
+    if (!this.expenseReason || this.expenseReason.trim() === '') {
+      this.alertService.error('Please enter a reason for the expense');
+      return;
+    }
+    console.log('Adding expense:', this.expenseAmount, this.expenseReason);
+    if (!this.expenseAmount || this.expenseAmount <= 0) {
+      this.alertService.error('Please enter a valid expense amount.');
+      return;
+    }
+    const playload = {
+      amount: this.expenseAmount,
+      reason: this.expenseReason
+    };
+
+    this.expenseService.addExpense(playload).subscribe({
+      next: () => {
+        this.alertService.success('Expense added successfully.');
+        this.expenseAmount = 0;
+        this.expenseReason = '';
+
+        this.loadDashboardData();
+      },
+      error: (err) => {
+        console.error('Failed to add expense', err);
+        this.alertService.error('Failed to add expense. Please try again.');
+      }
+    });
+
+  }
+
+  addQuickIncome(){
+    if (!this.incomeServiceType || !this.incomeAmount || this.incomeAmount <= 0 || !this.incomePaymentMode) {
+      this.alertService.error('Please fill all required fields');
+      return;
+    }
+
+    this.quickAddIncomeService.createIncome({
+      serviceType: this.incomeServiceType,
+      clientName: this.incomeClientName.trim() || 'Walk-in Customer',
+      amount: this.incomeAmount,
+      modeOfPayment: this.incomePaymentMode
+    }).subscribe({
+      next: () => {
+        this.alertService.success('Income added successfully!');
+        this.resetIncomeForm();
+        this.loadDashboardData();
+      },
+      error: (err) => {
+        console.error('Failed to add income:', err);
+        this.alertService.error('Failed to add income');
+      }
+    });
+
+    }
+
+  selectPaymentMode(mode: PaymentMode, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.incomePaymentMode = checked ? mode : '';
+  }
+
+  trackServiceType(_index: number, service: ServiceType): string {
+    return service._id;
+  }
+
+  generateQuickIncomeReport(): void {
+    this.quickAddIncomeService.getIncomes().subscribe({
+      next: records => {
+        this.quickAddIncomeRecords = records;
+        if (!records.length) {
+          this.alertService.error('No Quick Add Income entries available to export');
+          return;
+        }
+
+        void this.downloadQuickIncomePdf(records);
+      },
+      error: () => this.alertService.error('Failed to generate Quick Add Income report')
+    });
+  }
+
+  private async downloadQuickIncomePdf(records: QuickAddIncomeRecord[]): Promise<void> {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 12;
+      const columns = [
+        { label: 'Customer', width: 60 },
+        { label: 'Service', width: 64 },
+        { label: 'Amount', width: 38 },
+        { label: 'Payment Mode', width: 48 },
+        { label: 'Date', width: pageWidth - (margin * 2) - 210 }
+      ];
+      const lineHeight = 5;
+      let rowY = 34;
+
+      const drawPageHeader = (): void => {
+        pdf.setTextColor(54, 36, 24);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(16);
+        pdf.text('Quick Add Income Report', margin, 15);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor(90, 90, 90);
+        pdf.text(`Generated on ${new Date().toLocaleDateString('en-GB')}`, margin, 21);
+
+        pdf.setFillColor(151, 99, 61);
+        pdf.rect(margin, 26, pageWidth - (margin * 2), 8, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        let x = margin;
+        columns.forEach(column => {
+          pdf.text(column.label, x + 2, 31.5);
+          x += column.width;
+        });
+        rowY = 34;
+      };
+
+      drawPageHeader();
+
+      records.forEach((record, index) => {
+        const values = [
+          record.clientName || 'Walk-in Customer',
+          record.serviceType || '-',
+          `INR ${Number(record.amount || 0).toFixed(2)}`,
+          record.modeOfPayment || '-',
+          record.createdAt ? new Date(record.createdAt).toLocaleDateString('en-GB') : '-'
+        ];
+        const lines = values.map((value, columnIndex) =>
+          pdf.splitTextToSize(String(value), columns[columnIndex].width - 4) as string[]
+        );
+        const rowHeight = Math.max(9, Math.max(...lines.map(cell => cell.length)) * lineHeight + 4);
+
+        if (rowY + rowHeight > pageHeight - 14) {
+          pdf.addPage();
+          drawPageHeader();
+        }
+
+        pdf.setFillColor(index % 2 === 0 ? 249 : 255, index % 2 === 0 ? 246 : 255, index % 2 === 0 ? 243 : 255);
+        pdf.rect(margin, rowY, pageWidth - (margin * 2), rowHeight, 'F');
+        pdf.setDrawColor(220, 210, 202);
+        pdf.rect(margin, rowY, pageWidth - (margin * 2), rowHeight);
+        pdf.setTextColor(35, 35, 35);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        let x = margin;
+        lines.forEach((cellLines, columnIndex) => {
+          pdf.text(cellLines, x + 2, rowY + 6);
+          x += columns[columnIndex].width;
+        });
+        rowY += rowHeight;
+      });
+
+      const pageCount = pdf.getNumberOfPages();
+      for (let page = 1; page <= pageCount; page++) {
+        pdf.setPage(page);
+        pdf.setFontSize(8);
+        pdf.setTextColor(110, 110, 110);
+        pdf.text(`Page ${page} of ${pageCount}`, pageWidth - margin, pageHeight - 6, { align: 'right' });
+      }
+
+      const generatedAt = new Date();
+      const pdfBlob = pdf.output('blob');
+      const downloadUrl = URL.createObjectURL(pdfBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = downloadUrl;
+      downloadLink.download = `Quick-Add-Income-${generatedAt.toISOString().replace(/[:.]/g, '-')}.pdf`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+    } catch {
+      this.alertService.error('Failed to generate Quick Add Income report');
+    }
+  }
+
+  resetIncomeForm() {
+    this.incomeServiceType = '';
+    this.incomeAmount = 0;
+    this.incomeClientName = 'Walk-in Customer';
+    this.incomePaymentMode = '';
+  }
+}

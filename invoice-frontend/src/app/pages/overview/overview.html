@@ -1,0 +1,163 @@
+<div class="overview-container">
+
+  <!-- Header Section -->
+  <div class="header-row">
+    <h2 class="page-title">Overview Dashboard</h2>
+
+    <div class="filter-bar">
+      <select [(ngModel)]="selectedFilter" (change)="applyPresetFilter()">
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+      </select>
+
+      <span class="to-separator">|</span>
+
+      <input type="date" [(ngModel)]="fromDate" (change)="applyCustomDateFilter()" />
+      <span class="to-separator">to</span>
+      <input type="date" [(ngModel)]="toDate" (change)="applyCustomDateFilter()" />
+    </div>
+  </div>
+
+  <!-- Loading placeholders -->
+  <div *ngIf="loading" class="overview-skeleton" aria-label="Loading dashboard">
+    <div class="skeleton-stats-grid">
+      <div class="skeleton-stat-card" *ngFor="let item of [1, 2, 3, 4]">
+        <span class="skeleton skeleton-line medium"></span>
+        <span class="skeleton skeleton-value"></span>
+      </div>
+    </div>
+    <div class="skeleton-overview-bottom">
+      <div class="skeleton skeleton-chart"></div>
+      <div class="skeleton-form-card">
+        <span class="skeleton skeleton-line medium"></span>
+        <span class="skeleton skeleton-input"></span>
+        <span class="skeleton skeleton-input"></span>
+        <span class="skeleton skeleton-button"></span>
+        <span class="skeleton skeleton-input tall"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Metrics Grid -->
+  <div class="stats-grid" *ngIf="!loading">
+    <div class="stat-card clients">
+      <div class="card-header">
+        <span class="label">Total Clients</span>
+        <div class="card-icon">👥</div>
+      </div>
+      <h3 class="value">{{ totalClients }}</h3>
+    </div>
+
+    <div class="stat-card income">
+      <div class="card-header">
+        <span class="label">Total Income</span>
+        <div class="card-icon">💰</div>
+      </div>
+      <h3 class="value">₹ {{ totalIncome | number:'1.0-0' }}</h3>
+    </div>
+
+    <div class="stat-card received">
+      <div class="card-header">
+        <span class="label">Payments Received</span>
+        <div class="card-icon">✅</div>
+      </div>
+      <h3 class="value">₹ {{ totalReceived | number:'1.0-0' }}</h3>
+    </div>
+
+    <div class="stat-card balance">
+      <div class="card-header">
+        <span class="label">Outstanding Balance</span>
+        <div class="card-icon">⏳</div>
+      </div>
+      <h3 class="value">₹ {{ totalBalance | number:'1.0-0' }}</h3>
+    </div>
+  </div>
+
+  <!-- Main Content Row -->
+  <div class="overview-bottom" *ngIf="!loading">
+
+    <!-- Revenue Chart -->
+    <div class="chart-card">
+      <h4>Income vs Expenses</h4>
+      <div class="chart-wrapper">
+        <canvas #incomeChart></canvas>
+      </div>
+    </div>
+
+    <!-- Quick Expense Form -->
+    <div class="expense-card">
+      <h4>Quick Add Expense</h4>
+
+      <div class="form-group">
+        <label>Amount (₹)</label>
+        <input type="number" placeholder="0.00" [(ngModel)]="expenseAmount" required />
+      </div>
+
+      <div class="form-group">
+        <label>Reason / Category</label>
+        <input type="text" placeholder="e.g. Ink or Printer Issues " [(ngModel)]="expenseReason" required />
+      </div>
+      <button class="expense-btn" (click)="addExpense()">Add Expense</button>
+
+      <div class="income-card">
+        <div class="income-card-header">
+          <div>
+            <span class="income-eyebrow">Income Entry</span>
+            <h4>Quick Add Income</h4>
+            <p>Record a payment without creating an invoice.</p>
+          </div>
+          <button type="button" class="report-btn" (click)="generateQuickIncomeReport()">
+            Generate Report
+          </button>
+        </div>
+
+        <div class="quick-income-grid">
+          <div class="form-group">
+            <label>Service Type</label>
+            <select class="service-select" [(ngModel)]="incomeServiceType">
+              <option value="">Select Service</option>
+              <option *ngFor="let serviceType of serviceTypes; trackBy: trackServiceType" [value]="serviceType.name">
+                {{ serviceType.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Client Name <span>(Optional)</span></label>
+            <input type="text" placeholder="Walk-in Customer" [(ngModel)]="incomeClientName" />
+          </div>
+
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" placeholder="0.00" [(ngModel)]="incomeAmount" min="0" />
+          </div>
+
+          <div class="form-group payment-group">
+            <label>Mode of Payment</label>
+            <div class="payment-checkboxes">
+              <label class="payment-checkbox">
+                <input type="checkbox" name="incomePaymentOnline" [checked]="incomePaymentMode === 'Online'"
+                  (change)="selectPaymentMode('Online', $event)" />
+                Online
+              </label>
+              <label class="payment-checkbox">
+                <input type="checkbox" name="incomePaymentCash" [checked]="incomePaymentMode === 'Cash'"
+                  (change)="selectPaymentMode('Cash', $event)" />
+                Cash
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="income-submit-btn" (click)="addQuickIncome()"
+          [disabled]="!incomeServiceType || !incomeAmount || incomeAmount <= 0 || !incomePaymentMode">
+          Add Income
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</div>
