@@ -52,8 +52,8 @@
           </div>
           <div class="field-row">
             <div class="input-field">
-              <label>Email ID <span class="required">*</span></label>
-              <input type="email" [(ngModel)]="invoice.emailId" placeholder="Enter client email address" required />
+              <label>Email ID <span class="optional-label">(Optional)</span></label>
+              <input type="email" [(ngModel)]="invoice.emailId" placeholder="Enter client email address" />
             </div>
           </div>
           <div class="field-row" *ngIf="isBusinessInvoice">

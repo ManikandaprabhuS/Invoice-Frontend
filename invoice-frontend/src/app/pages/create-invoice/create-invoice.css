@@ -532,6 +532,12 @@
   }
 }
 
+.optional-label {
+  color: #8a8f98;
+  font-size: 0.78em;
+  font-weight: 500;
+}
+
 @media (max-width: 576px) {
   .create-invoice-wrapper { padding: 10px; }
   .header-section { margin-bottom: 14px; }

@@ -1,21 +1,24 @@
 .alert-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
+    top: 16px;
+    right: 16px;
+    z-index: 10000;
+    width: min(380px, calc(100vw - 32px));
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    align-items: flex-end;
+    gap: 10px;
     pointer-events: none;
 }
 
 .alert {
     pointer-events: auto;
-    min-width: 320px;
-    max-width: 380px;
+    width: 100%;
+    min-width: 0;
     background: #ffffff;
-    border-radius: 4px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eadfd6;
+    border-radius: 12px;
+    box-shadow: 0 14px 32px rgba(65, 39, 21, 0.18), 0 3px 8px rgba(65, 39, 21, 0.08);
     /* Soft, elevated shadow */
     display: flex;
     align-items: stretch;
@@ -23,12 +26,12 @@
     cursor: pointer;
     animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
-    min-height: 70px;
+    min-height: 64px;
 }
 
 /* Icon Section */
 .icon-section {
-    width: 60px;
+    width: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -37,13 +40,11 @@
 }
 
 .alert.success .icon-section {
-    background-color: #47D764;
-    /* Vibrant Green */
+    background-color: #2f9e5b;
 }
 
 .alert.error .icon-section {
-    background-color: #FF355B;
-    /* Vibrant Red */
+    background-color: #d64545;
 }
 
 /* Content Section */
@@ -112,7 +113,7 @@
     .alert-container {
         top: 12px;
         right: 12px;
-        left: 12px;
+        width: calc(100vw - 24px);
     }
 
     .alert {

@@ -59,9 +59,6 @@
     </button>
   </form>
 
-  <p class="message error" *ngIf="error">{{ error }}</p>
-  <p class="message success" *ngIf="success">{{ success }}</p>
-
   <section class="user-card user-skeleton" *ngIf="loading" aria-label="Loading user accounts">
     <span class="skeleton skeleton-heading"></span>
     <div class="skeleton-table-row" *ngFor="let row of [1, 2, 3]">

@@ -196,11 +196,6 @@ export class CreateInvoice implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.invoice.emailId || this.invoice.emailId.trim() === '') {
-      this.alertService.error('Please enter client email ID');
-      return;
-    }
-
     // Validate at least one service exists
     if (!this.invoice.services || this.invoice.services.length === 0) {
       this.alertService.error('Please add at least one item to the invoice');
@@ -239,7 +234,7 @@ export class CreateInvoice implements OnInit, OnDestroy {
     this.invoice.gstNumber = this.isBusinessInvoice
       ? this.invoice.gstNumber.trim().toUpperCase()
       : '';
-    this.invoice.emailId = this.invoice.emailId.trim();
+    this.invoice.emailId = (this.invoice.emailId || '').trim();
     this.recalculate();
     this.invoiceService.createInvoice(this.invoice)
       .then(() => {

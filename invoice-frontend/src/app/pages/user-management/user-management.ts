@@ -3,9 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment.generated';
+import { AlertService } from '../service/alert.service';
 
 interface Account {
-  _id: string;
+  _id?: string;
+  id?: string;
   userName: string;
   emailId: string;
   branchName?: string;
@@ -25,8 +27,6 @@ export class UserManagement implements OnInit {
   users: Account[] = [];
   loading = true;
   saving = false;
-  error = '';
-  success = '';
   newUser = { userName: '', emailId: '', branchName: '', password: '' };
   showPassword = false;
   currentPage = 1;
@@ -37,7 +37,10 @@ export class UserManagement implements OnInit {
   rangeStart = 0;
   rangeEnd = 0;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private alertService: AlertService,
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -53,15 +56,13 @@ export class UserManagement implements OnInit {
         this.loading = false;
       },
       error: error => {
-        this.error = error.error?.message || 'Unable to load users';
+        this.alertService.error(error.error?.message || 'Unable to load users');
         this.loading = false;
       },
     });
   }
 
   createUser(): void {
-    this.error = '';
-    this.success = '';
     if (this.saving) return;
 
     this.saving = true;
@@ -71,11 +72,11 @@ export class UserManagement implements OnInit {
         this.currentPage = 1;
         this.updatePagination();
         this.newUser = { userName: '', emailId: '', branchName: '', password: '' };
-        this.success = 'User account created.';
+        this.alertService.success('User account created.');
         this.saving = false;
       },
       error: error => {
-        this.error = error.error?.message || 'Unable to create user';
+        this.alertService.error(error.error?.message || 'Unable to create user');
         this.saving = false;
       },
     });
@@ -84,16 +85,20 @@ export class UserManagement implements OnInit {
   deleteUser(user: Account): void {
     if (user.role !== 'user' || !confirm(`Delete the account for ${user.userName}?`)) return;
 
-    this.error = '';
-    this.success = '';
-    this.http.delete<{ message: string }>(`${this.usersUrl}/${user._id}`, { headers: this.authHeaders() }).subscribe({
+    const userId = user._id || user.id;
+    if (!userId) {
+      this.alertService.error('Invalid user account');
+      return;
+    }
+
+    this.http.delete<{ message: string }>(`${this.usersUrl}/${userId}`, { headers: this.authHeaders() }).subscribe({
       next: result => {
-        this.users = this.users.filter(account => account._id !== user._id);
+        this.users = this.users.filter(account => (account._id || account.id) !== userId);
         this.updatePagination();
-        this.success = result.message;
+        this.alertService.success(result.message);
       },
       error: error => {
-        this.error = error.error?.message || 'Unable to delete user';
+        this.alertService.error(error.error?.message || 'Unable to delete user');
       },
     });
   }
@@ -119,7 +124,7 @@ export class UserManagement implements OnInit {
   }
 
   trackUser(_index: number, user: Account): string {
-    return user._id;
+    return user._id || user.id || String(_index);
   }
 
   private authHeaders(): HttpHeaders {
