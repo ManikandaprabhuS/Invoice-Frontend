@@ -73,14 +73,42 @@
           <tbody>
             <tr class="invoice-row" *ngFor="let invoice of paginatedCustomerInvoices; trackBy: trackInvoice">
               <td data-label="ID">{{ invoice._id | slice:-5 }}</td>
-              <td data-label="Customer"><span class="client-name">{{ invoice.clientName }}</span></td>
-              <td data-label="Service">{{ invoice.serviceType }}</td>
-              <td data-label="Amount"><span class="amount-cell">₹ {{ invoice.amount | number:'1.0-2' }}</span></td>
-              <td data-label="Payment"><span class="payment-pill">{{ invoice.modeOfPayment }}</span></td>
+              <td data-label="Customer">
+                <span class="client-name" *ngIf="editingCustomerInvoice?._id !== invoice._id">{{ invoice.clientName }}</span>
+                <input class="edit-input" *ngIf="editingCustomerInvoice?._id === invoice._id"
+                  [(ngModel)]="editingCustomerInvoice!.clientName" />
+              </td>
+              <td data-label="Service">
+                <span *ngIf="editingCustomerInvoice?._id !== invoice._id">{{ invoice.serviceType }}</span>
+                <input class="edit-input" *ngIf="editingCustomerInvoice?._id === invoice._id"
+                  [(ngModel)]="editingCustomerInvoice!.serviceType" />
+              </td>
+              <td data-label="Amount">
+                <span class="amount-cell" *ngIf="editingCustomerInvoice?._id !== invoice._id">₹ {{ invoice.amount | number:'1.0-2' }}</span>
+                <input class="edit-input" type="number" min="0.01" step="0.01"
+                  *ngIf="editingCustomerInvoice?._id === invoice._id" [(ngModel)]="editingCustomerInvoice!.amount" />
+              </td>
+              <td data-label="Payment">
+                <span class="payment-pill" *ngIf="editingCustomerInvoice?._id !== invoice._id">{{ invoice.modeOfPayment }}</span>
+                <select class="edit-input" *ngIf="editingCustomerInvoice?._id === invoice._id"
+                  [(ngModel)]="editingCustomerInvoice!.modeOfPayment">
+                  <option value="Online">Online</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </td>
               <td data-label="Date"><span class="date-cell">{{ invoice.createdAt | date:'dd MMM yyyy' }}</span></td>
               <td data-label="Actions">
                 <div class="action-buttons">
-                  <button class="btn-view" type="button" (click)="viewCustomerInvoice(invoice)">View</button>
+                  <button *ngIf="editingCustomerInvoice?._id !== invoice._id" class="btn-view" type="button"
+                    (click)="viewCustomerInvoice(invoice)">View</button>
+                  <button *ngIf="editingCustomerInvoice?._id !== invoice._id" class="btn-action" type="button"
+                    (click)="editCustomerInvoice(invoice)" title="Edit" aria-label="Edit customer invoice">✏️</button>
+                  <button *ngIf="editingCustomerInvoice?._id !== invoice._id" class="btn-action danger" type="button"
+                    (click)="deleteCustomerInvoice(invoice._id)" title="Delete" aria-label="Delete customer invoice">🗑️</button>
+                  <button *ngIf="editingCustomerInvoice?._id === invoice._id" class="btn-action" type="button"
+                    (click)="saveCustomerInvoiceEdit()" title="Save" aria-label="Save customer invoice">💾</button>
+                  <button *ngIf="editingCustomerInvoice?._id === invoice._id" class="btn-action danger" type="button"
+                    (click)="cancelCustomerInvoiceEdit()" title="Cancel" aria-label="Cancel editing">✖</button>
                 </div>
               </td>
             </tr>

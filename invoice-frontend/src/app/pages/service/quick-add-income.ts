@@ -45,4 +45,12 @@ export class QuickAddIncomeService {
   getIncomes(): Observable<QuickAddIncomeRecord[]> {
     return this.http.get<QuickAddIncomeRecord[]>(this.apiUrl, { headers: this.getHeaders() });
   }
+
+  updateIncome(id: string, payload: QuickAddIncomePayload): Observable<QuickAddIncomeRecord> {
+    return this.http.put<QuickAddIncomeRecord>(`${this.apiUrl}/${id}`, payload, { headers: this.getHeaders() });
+  }
+
+  deleteIncome(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+  }
 }

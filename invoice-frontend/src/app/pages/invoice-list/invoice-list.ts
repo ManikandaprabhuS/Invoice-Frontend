@@ -36,6 +36,7 @@ export class InvoiceList implements OnInit {
   mobileInvoiceSection: 'customer' | 'business' = 'customer';
   selectedCount = 0;
   editingInvoice: any = null;
+  editingCustomerInvoice: QuickAddIncomeRecord | null = null;
   loadingInvoices = true;
   loadingCustomerInvoices = true;
 
@@ -500,6 +501,58 @@ export class InvoiceList implements OnInit {
     return this.editingInvoice?._id === invoice._id
       ? this.calculateBalance(this.editingInvoice)
       : this.calculateBalance(invoice);
+  }
+
+  editCustomerInvoice(invoice: QuickAddIncomeRecord): void {
+    this.editingCustomerInvoice = { ...invoice };
+  }
+
+  saveCustomerInvoiceEdit(): void {
+    const invoice = this.editingCustomerInvoice;
+    if (!invoice) return;
+
+    const serviceType = invoice.serviceType.trim();
+    const clientName = invoice.clientName.trim() || 'Walk-in Customer';
+    const amount = Number(invoice.amount);
+    if (!serviceType || !Number.isFinite(amount) || amount <= 0 ||
+      !['Online', 'Cash'].includes(invoice.modeOfPayment)) {
+      this.alertService.error('Enter a valid service, amount and payment mode');
+      return;
+    }
+
+    this.quickAddIncomeService.updateIncome(invoice._id, {
+      serviceType,
+      clientName,
+      amount,
+      modeOfPayment: invoice.modeOfPayment
+    }).subscribe({
+      next: updated => {
+        this.customerInvoices = this.customerInvoices.map(record =>
+          record._id === updated._id ? updated : record
+        );
+        this.editingCustomerInvoice = null;
+        this.applyCustomerFilter();
+        this.alertService.success('Customer invoice updated successfully');
+      },
+      error: error => this.alertService.error(error.error?.message || 'Failed to update customer invoice')
+    });
+  }
+
+  cancelCustomerInvoiceEdit(): void {
+    this.editingCustomerInvoice = null;
+  }
+
+  deleteCustomerInvoice(id: string): void {
+    if (!confirm('Are you sure you want to delete this customer invoice?')) return;
+
+    this.quickAddIncomeService.deleteIncome(id).subscribe({
+      next: result => {
+        this.customerInvoices = this.customerInvoices.filter(record => record._id !== id);
+        this.applyCustomerFilter();
+        this.alertService.success(result.message);
+      },
+      error: error => this.alertService.error(error.error?.message || 'Failed to delete customer invoice')
+    });
   }
 
   trackInvoice(_index: number, invoice: { _id: string }): string {
