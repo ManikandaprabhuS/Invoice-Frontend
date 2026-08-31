@@ -53,8 +53,8 @@ export class Overview implements OnInit, OnDestroy {
   ) { }
 
   // ================= NEW (FILTER SUPPORT) =================
-  selectedFilter: 'today' | 'week' | 'month' | 'year' = 'today';
-  chartFilter: 'daily' | 'weekly' | 'monthly' = 'daily';
+  selectedFilter: 'today' | 'week' | 'month' | 'year' = 'year';
+  chartFilter: 'daily' | 'weekly' | 'monthly' = 'monthly';
 
   fromDate: string | null = null;
   toDate: string | null = null;
