@@ -9,7 +9,21 @@ export const adminGuard: CanActivateFn = () => {
   if (isPlatformBrowser(platform)) {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (localStorage.getItem('token') && user.role === 'admin') return true;
+      const token = localStorage.getItem('token');
+      const userRole = typeof user.role === 'string' ? user.role.toLowerCase() : '';
+
+      if (token && userRole === 'admin') return true;
+
+      const payloadPart = token?.split('.')[1];
+      if (payloadPart) {
+        const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+        const tokenRole = JSON.parse(atob(paddedBase64)).role;
+
+        if (typeof tokenRole === 'string' && tokenRole.toLowerCase() === 'admin') {
+          return true;
+        }
+      }
     } catch (_err) {
       // Invalid locally stored data is treated as an unauthenticated session.
     }
