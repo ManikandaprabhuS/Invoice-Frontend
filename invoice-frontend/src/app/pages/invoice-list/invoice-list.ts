@@ -494,7 +494,10 @@ export class InvoiceList implements OnInit {
   }
 
   calculateBalance(invoice: any): number {
-    return Number(invoice?.totalAmount || 0) - Number(invoice?.receivedAmount || 0);
+    const balance = Number(invoice?.totalAmount || 0)
+      - Number(invoice?.discount || 0)
+      - Number(invoice?.receivedAmount || 0);
+    return Math.round((balance + Number.EPSILON) * 100) / 100;
   }
 
   getDisplayedBalance(invoice: any): number {

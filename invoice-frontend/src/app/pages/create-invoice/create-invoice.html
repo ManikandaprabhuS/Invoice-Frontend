@@ -153,6 +153,15 @@
           <span>Final Total</span>
           <span class="value">₹ {{ invoice.totalAmount | number:'1.2-2' }}</span>
         </div>
+        <div class="summary-row discount">
+          <label>Discount (₹)</label>
+          <input type="number" class="summary-input" [(ngModel)]="invoice.discount" (input)="recalculate()"
+            placeholder="Enter discount amount" min="0" [max]="invoice.totalAmount" />
+        </div>
+        <div class="summary-row total">
+          <span>Payable Total</span>
+          <span class="value">₹ {{ (invoice.totalAmount - (invoice.discount || 0)) | number:'1.2-2' }}</span>
+        </div>
         <div class="summary-row received">
           <label>Amount Received (₹)</label>
           <input type="number" class="summary-input" [(ngModel)]="invoice.receivedAmount" (input)="recalculate()"
@@ -168,7 +177,7 @@
         </div>
         <div class="summary-row balance-due">
           <span class="label">Balance Due</span>
-          <span class="value">₹ {{ invoice.balanceAmount | number:'1.0-0' }}</span>
+          <span class="value">₹ {{ invoice.balanceAmount | number:'1.2-2' }}</span>
         </div>
       </div>
     </div>

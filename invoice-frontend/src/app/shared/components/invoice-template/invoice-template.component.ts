@@ -18,12 +18,14 @@ export class InvoiceTemplateComponent implements OnChanges {
     displaySgst = 0;
     displayRoundOff = 0;
     displayTotal = 0;
+    displayDiscount = 0;
+    displayPayableTotal = 0;
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['invoice'] && this.invoice) {
             this.prepareDisplayData();
             this.prepareAmounts();
-            this.amountInWords = this.numberToWords(this.displayTotal);
+            this.amountInWords = this.numberToWords(this.displayPayableTotal);
         }
     }
 
@@ -67,6 +69,12 @@ export class InvoiceTemplateComponent implements OnChanges {
         this.displayRoundOff = this.hasNumber(this.invoice.roundOff)
             ? Number(this.invoice.roundOff)
             : this.roundCurrency(this.displayTotal - totalBeforeRoundOff);
+        this.displayDiscount = this.hasNumber(this.invoice.discount)
+            ? Math.max(0, Number(this.invoice.discount))
+            : 0;
+        this.displayPayableTotal = this.roundCurrency(
+            Math.max(0, this.displayTotal - this.displayDiscount)
+        );
     }
 
     trackServiceRow(index: number): number {

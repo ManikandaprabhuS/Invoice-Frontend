@@ -43,6 +43,7 @@ export class CreateInvoice implements OnInit, OnDestroy {
     sgstAmount: 0,
     roundOff: 0,
     totalAmount: 0,
+    discount: null as number | null,
     receivedAmount: 0,
     modeOfPayment: '',
     balanceAmount: 0,
@@ -119,8 +120,9 @@ export class CreateInvoice implements OnInit, OnDestroy {
     this.invoice.totalAmount = this.roundFinalAmount(totalBeforeRoundOff);
     this.invoice.roundOff = this.roundCurrency(this.invoice.totalAmount - totalBeforeRoundOff);
 
+    const discount = Number(this.invoice.discount) || 0;
     this.invoice.balanceAmount = this.roundCurrency(
-      this.invoice.totalAmount - (Number(this.invoice.receivedAmount) || 0)
+      (this.invoice.totalAmount - discount) - (Number(this.invoice.receivedAmount) || 0)
     );
   }
 
@@ -227,6 +229,11 @@ export class CreateInvoice implements OnInit, OnDestroy {
       this.alertService.error('Please enter a valid received amount');
       return;
     }
+    const discount = Number(this.invoice.discount) || 0;
+    if (discount < 0 || discount > this.invoice.totalAmount) {
+      this.alertService.error('Discount must be between 0 and the final total');
+      return;
+    }
     if (!this.invoice.modeOfPayment) {
       this.alertService.error('Please select a payment mode');
       return;
@@ -266,6 +273,7 @@ export class CreateInvoice implements OnInit, OnDestroy {
     this.invoice.sgstAmount = 0;
     this.invoice.roundOff = 0;
     this.invoice.totalAmount = 0;
+    this.invoice.discount = null;
     this.invoice.receivedAmount = 0;
     this.invoice.modeOfPayment = '';
     this.invoice.balanceAmount = 0;

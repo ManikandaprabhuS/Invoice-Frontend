@@ -395,6 +395,7 @@
   font-weight: 600;
 }
 
+.summary-row.discount,
 .summary-row.received,
 .summary-row.payment-mode {
   padding: 16px;
@@ -405,6 +406,7 @@
   gap: 10px;
 }
 
+.summary-row.discount label,
 .summary-row.received label,
 .summary-row.payment-mode label {
   font-size: 11px;

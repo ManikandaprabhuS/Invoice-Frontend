@@ -91,6 +91,14 @@
                     <td colspan="5" class="text-right"><strong>Total</strong></td>
                     <td class="text-right"><strong>{{displayTotal | number:'1.2-2'}}</strong></td>
                 </tr>
+                <tr>
+                    <td colspan="5" class="text-right"><strong>Discount</strong></td>
+                    <td class="text-right">{{displayDiscount | number:'1.2-2'}}</td>
+                </tr>
+                <tr class="total-row-highlight">
+                    <td colspan="5" class="text-right"><strong>Payable Total</strong></td>
+                    <td class="text-right"><strong>{{displayPayableTotal | number:'1.2-2'}}</strong></td>
+                </tr>
             </tfoot>
         </table>
     </div>
