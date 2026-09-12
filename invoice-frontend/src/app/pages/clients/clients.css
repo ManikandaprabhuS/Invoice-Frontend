@@ -515,9 +515,9 @@
 .btn-action.danger { color: var(--accent-red); }
 
 .pagination-footer {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
     padding: 14px 18px;
     border-top: 1px solid #eee8e2;
@@ -530,6 +530,7 @@
 }
 
 .pagination-footer .pagination-container {
+    grid-column: 2;
     margin: 0;
     padding: 0;
     gap: 8px;
@@ -585,7 +586,7 @@
     .header-actions { width: 100%; flex-direction: column; align-items: stretch; }
     .search-box { width: 100%; max-width: none; flex: none; }
     .report-button { width: 100%; min-height: 44px; }
-    .pagination-footer { align-items: stretch; flex-direction: column; }
+    .pagination-footer { display: flex; align-items: stretch; flex-direction: column; }
     .results-summary { text-align: center; }
     .pagination-footer .pagination-container { justify-content: center; flex-wrap: wrap; }
     .page-numbers { order: 3; width: 100%; max-width: 100%; justify-content: center; }
