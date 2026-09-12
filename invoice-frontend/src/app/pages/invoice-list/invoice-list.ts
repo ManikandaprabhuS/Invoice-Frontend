@@ -46,7 +46,6 @@ export class InvoiceList implements OnInit {
   customerPageSize = 4;
   customerCurrentPage = 1;
   customerTotalPages = 1;
-  readonly pageSizeOptions = [4, 10, 20];
   pageNumbers: number[] = [];
   customerPageNumbers: number[] = [];
 
@@ -132,8 +131,7 @@ export class InvoiceList implements OnInit {
   }
 
   calculatePagination() {
-    this.totalPages = Math.ceil(this.filteredInvoices.length / this.pageSize);
-    this.pageNumbers = Array.from({ length: this.totalPages }, (_, index) => index + 1);
+    this.totalPages = Math.max(1, Math.ceil(this.filteredInvoices.length / this.pageSize));
     this.currentPage = 1;
     this.updatePage();
   }
@@ -144,7 +142,6 @@ export class InvoiceList implements OnInit {
 
   calculateCustomerPagination() {
     this.customerTotalPages = Math.max(1, Math.ceil(this.filteredCustomerInvoices.length / this.customerPageSize));
-    this.customerPageNumbers = Array.from({ length: this.customerTotalPages }, (_, index) => index + 1);
     this.customerCurrentPage = 1;
     this.updateCustomerPage();
   }
@@ -152,11 +149,19 @@ export class InvoiceList implements OnInit {
   updatePage() {
     const start = (this.currentPage - 1) * this.pageSize;
     this.paginatedInvoices = this.filteredInvoices.slice(start, start + this.pageSize);
+    this.pageNumbers = this.buildPageWindow(this.totalPages, this.currentPage);
   }
 
   updateCustomerPage() {
     const start = (this.customerCurrentPage - 1) * this.customerPageSize;
     this.paginatedCustomerInvoices = this.filteredCustomerInvoices.slice(start, start + this.customerPageSize);
+    this.customerPageNumbers = this.buildPageWindow(this.customerTotalPages, this.customerCurrentPage);
+  }
+
+  private buildPageWindow(totalPages: number, currentPage: number): number[] {
+    const firstPage = Math.floor((currentPage - 1) / 6) * 6 + 1;
+    const lastPage = Math.min(firstPage + 5, totalPages);
+    return Array.from({ length: lastPage - firstPage + 1 }, (_, index) => firstPage + index);
   }
 
   goToPage(page: number) {

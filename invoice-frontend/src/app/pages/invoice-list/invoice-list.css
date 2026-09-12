@@ -546,6 +546,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 14px;
 }
@@ -774,15 +775,23 @@
   position: relative;
   min-height: 38px;
   margin-top: 16px;
+  padding: 0;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .page-numbers {
   display: flex;
-  max-width: min(100%, 360px);
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: none;
   gap: 5px;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  overflow: visible;
+  scrollbar-width: none;
+}
+
+.page-numbers::-webkit-scrollbar {
+  display: none;
 }
 
 .page-number {
@@ -890,6 +899,76 @@
   }
 }
 
+/* Tablets retain the desktop table structure; overflow stays inside the table card. */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .invoice-list-container {
+    padding: 16px;
+  }
+
+  .section-heading > div:first-child {
+    flex: 1 1 220px;
+  }
+
+  .section-actions {
+    flex: 1 1 360px;
+  }
+
+  .invoice-section-card .table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .invoice-section-card .invoice-table {
+    display: table;
+    width: 100%;
+    min-width: 900px !important;
+  }
+
+  .invoice-section-card .customer-invoice-table {
+    min-width: 720px !important;
+  }
+
+  .invoice-section-card .invoice-table thead {
+    display: table-header-group;
+  }
+
+  .invoice-section-card .invoice-table tbody {
+    display: table-row-group;
+  }
+
+  .invoice-section-card .invoice-table tr {
+    display: table-row;
+    width: auto;
+  }
+
+  .invoice-section-card .invoice-table tr.invoice-row {
+    margin: 0;
+    padding: 0;
+  }
+
+  .invoice-section-card .invoice-table th,
+  .invoice-section-card .invoice-table td {
+    display: table-cell;
+    width: auto;
+  }
+
+  .invoice-section-card .invoice-table td::before {
+    display: none;
+    content: none;
+  }
+
+  .invoice-section-card .action-buttons {
+    width: auto;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    white-space: nowrap;
+  }
+
+  .invoice-section-card .pagination-container { padding: 0; }
+}
+
 @media (max-width: 700px) {
   .invoice-list-container { padding: 12px; }
   .header-section { margin-bottom: 16px; }
@@ -940,10 +1019,9 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 20px;
-    padding-bottom: 44px;
+    padding: 0;
   }
-  .page-numbers { order: 3; width: 100%; max-width: 100%; }
-  .page-size-control { right: auto; bottom: 0; left: 0; }
+  .page-numbers { order: 3; width: 100%; max-width: 100%; justify-content: flex-start; }
   .modal-backdrop {
     align-items: stretch;
     height: 100dvh;

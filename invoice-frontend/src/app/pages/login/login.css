@@ -104,6 +104,19 @@ button:hover {
   background-color: #555;
 }
 
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.flow-message {
+  margin: -8px 0 18px;
+  color: #666;
+  font-size: .9rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .link-group {
   margin-top: 20px;
 }
@@ -119,6 +132,13 @@ button:hover {
 .link-group a:hover {
   color: #333;
   text-decoration: underline;
+}
+
+.flow-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 16px;
 }
 
 @media (max-width: 480px) {

@@ -21,7 +21,7 @@ export class Clients {
   filteredClients: any[] = [];
 
 
-  pageSize = 5;
+  pageSize = 4;
   currentPage = 1;
   totalPages = 1;
   pageNumbers: number[] = [1];
@@ -53,7 +53,6 @@ export class Clients {
 
   setupPagination() {
     this.totalPages = Math.max(1, Math.ceil(this.filteredClients.length / this.pageSize));
-    this.pageNumbers = Array.from({ length: this.totalPages }, (_, index) => index + 1);
     this.currentPage = 1;
     this.updatePage();
   }
@@ -82,6 +81,7 @@ export class Clients {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
     this.paginatedClients = this.filteredClients.slice(start, end);
+    this.pageNumbers = this.buildPageNumbers();
   }
 
   nextPage() {
@@ -102,6 +102,12 @@ export class Clients {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.updatePage();
+  }
+
+  private buildPageNumbers(): number[] {
+    const firstPage = Math.floor((this.currentPage - 1) / 6) * 6 + 1;
+    const lastPage = Math.min(firstPage + 5, this.totalPages);
+    return Array.from({ length: lastPage - firstPage + 1 }, (_, index) => firstPage + index);
   }
 
   get showingStart(): number {
@@ -161,10 +167,10 @@ export class Clients {
     this.filteredClients.forEach((client, rowIndex) => {
       const values = [
         client.userName || '-',
-        client.phoneNumber || '-',
-        client.gstNumber || '-',
-        client.emailId || '-',
-        client.address || '-'
+        client.phoneNumber || 'NULL',
+        client.gstNumber || 'NULL',
+        client.emailId || 'NULL',
+        client.address || 'NULL'
       ];
       const wrapped = values.map((value, index) => pdf.splitTextToSize(String(value), columnWidths[index] - (rowPadding * 2)));
       const rowHeight = Math.max(8, Math.max(...wrapped.map(lines => lines.length)) * 4 + 3);
@@ -205,7 +211,15 @@ export class Clients {
   saveEdit() {
     if (!this.editingClient) return;
 
-    this.clientService.updateClient(this.editingClient._id, this.editingClient).subscribe({
+    const updatedClient = {
+      ...this.editingClient,
+      phoneNumber: this.toNullableText(this.editingClient.phoneNumber),
+      gstNumber: this.toNullableText(this.editingClient.gstNumber),
+      emailId: this.toNullableText(this.editingClient.emailId),
+      address: this.toNullableText(this.editingClient.address)
+    };
+
+    this.clientService.updateClient(this.editingClient._id, updatedClient).subscribe({
       next: () => {
         this.alertService.success('Client updated successfully');
         this.editingClient = null;
@@ -219,6 +233,12 @@ export class Clients {
 
   cancelEdit() {
     this.editingClient = null;
+  }
+
+  private toNullableText(value: unknown): string | null {
+    if (value === null || value === undefined) return null;
+    const normalized = String(value).trim();
+    return normalized || null;
   }
 
   deleteClient(id: string) {

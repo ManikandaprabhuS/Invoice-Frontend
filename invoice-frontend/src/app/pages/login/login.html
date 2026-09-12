@@ -44,23 +44,48 @@
         <input type="email" placeholder="Email Address" [(ngModel)]="emailId" />
       </div>
 
-      <button (click)="forgotPassword()">Send OTP</button>
+      <button (click)="forgotPassword()" [disabled]="submitting">
+        {{ submitting ? 'Sending...' : 'Send OTP' }}
+      </button>
 
       <div class="link-group">
         <a (click)="changeMode('login')">Back to Login</a>
       </div>
     </div>
 
-    <!-- Reset Password View -->
-    <div *ngIf="mode === 'reset'">
+    <!-- OTP Verification View -->
+    <div *ngIf="mode === 'otp'">
+      <p class="flow-message">Enter the 6-digit OTP sent to {{ emailId }}.</p>
       <div class="input-group">
-        <input type="text" placeholder="Enter OTP" [(ngModel)]="otp" />
-      </div>
-      <div class="input-group">
-        <input type="password" placeholder="New Password" [(ngModel)]="newPassword" />
+        <input type="text" placeholder="Enter OTP" [(ngModel)]="otp" inputmode="numeric"
+          autocomplete="one-time-code" maxlength="6" />
       </div>
 
-      <button (click)="resetPassword()">Reset Password</button>
+      <button (click)="verifyOtp()" [disabled]="submitting">
+        {{ submitting ? 'Verifying...' : 'Verify OTP' }}
+      </button>
+
+      <div class="link-group flow-links">
+        <a (click)="forgotPassword()">Resend OTP</a>
+        <a (click)="changeMode('forgot')">Change Email</a>
+        <a (click)="changeMode('login')">Back to Login</a>
+      </div>
+    </div>
+
+    <!-- New Password View (shown only after OTP verification) -->
+    <div *ngIf="mode === 'reset'">
+      <div class="input-group">
+        <input type="password" placeholder="New Password" [(ngModel)]="newPassword"
+          autocomplete="new-password" minlength="8" />
+      </div>
+      <div class="input-group">
+        <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword"
+          autocomplete="new-password" minlength="8" />
+      </div>
+
+      <button (click)="resetPassword()" [disabled]="submitting">
+        {{ submitting ? 'Updating...' : 'Reset Password' }}
+      </button>
 
       <div class="link-group">
         <a (click)="changeMode('login')">Back to Login</a>

@@ -537,9 +537,10 @@
 
 .page-numbers {
     display: flex;
-    max-width: 300px;
+    align-items: center;
+    max-width: none;
     gap: 6px;
-    overflow-x: auto;
+    overflow: visible;
 }
 
 .page-number {

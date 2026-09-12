@@ -124,12 +124,6 @@
           </div>
           <button type="button" (click)="nextCustomerPage()" [disabled]="customerCurrentPage === customerTotalPages"
             class="btn-pagination pagination-nav">Next</button>
-          <label class="page-size-control">
-            <span class="sr-only">Customer invoices per page</span>
-            <select [(ngModel)]="customerPageSize" (ngModelChange)="changeCustomerPageSize()">
-              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / page</option>
-            </select>
-          </label>
         </div>
       </div>
 
@@ -234,12 +228,6 @@
           </div>
           <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
             class="btn-pagination pagination-nav">Next</button>
-          <label class="page-size-control">
-            <span class="sr-only">Business invoices per page</span>
-            <select [(ngModel)]="pageSize" (ngModelChange)="changePageSize()">
-              <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} / page</option>
-            </select>
-          </label>
         </div>
       </div>
 
