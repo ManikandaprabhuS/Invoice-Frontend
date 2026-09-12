@@ -45,6 +45,17 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 table { width: 100%; min-width: 780px; border-collapse: collapse; }
 th { height: 54px; padding: 0 24px; border-bottom: 1px solid var(--border); color: #76513a; font-size: 12px; font-weight: 700; letter-spacing: .035em; text-align: left; text-transform: uppercase; }
 td { height: 72px; padding: 12px 24px; border-bottom: 1px solid #eee7e1; text-align: left; }
+tbody tr {
+  cursor: default;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: #fdfaf4;
+}
 .user-identity { gap: 14px; min-width: 0; }
 .user-avatar { width: 39px; height: 39px; flex: 0 0 39px; display: grid; place-items: center; border-radius: 50%; background: var(--brown-soft); color: var(--brown-dark); font-size: 15px; font-weight: 700; }
 .user-identity strong, .email-cell { overflow-wrap: anywhere; }

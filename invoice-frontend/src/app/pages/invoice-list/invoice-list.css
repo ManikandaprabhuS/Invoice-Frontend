@@ -715,14 +715,17 @@
 
 .invoice-section-card .invoice-table tr.invoice-row {
   border-radius: 0;
-  box-shadow: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
 }
 
 .invoice-section-card .invoice-table tr.invoice-row:hover {
-  background: #fffaf5;
-  box-shadow: none;
-  transform: none;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: #fdfaf4;
 }
 
 .invoice-section-card .invoice-table td {

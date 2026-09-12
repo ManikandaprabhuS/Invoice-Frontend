@@ -123,7 +123,9 @@
     background: var(--card-white);
     border-radius: var(--card-radius);
     box-shadow: var(--card-shadow);
-    transition: var(--transition);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: default;
 }
 

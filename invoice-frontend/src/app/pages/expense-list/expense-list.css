@@ -39,8 +39,17 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .expense-table { width: 100%; min-width: 720px; border-collapse: collapse; }
 .expense-table th { height: 66px; padding: 0 24px; border-bottom: 1px solid var(--border); color: #76513a; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
 .expense-table td { height: 88px; padding: 14px 24px; border-bottom: 1px solid #eee7e1; vertical-align: middle; }
-.expense-row { transition: background .16s ease; }
-.expense-row:hover { background: #fffdfa; }
+.expense-row {
+  cursor: default;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.expense-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: #fdfaf4;
+}
 .id-badge { width: 36px; height: 36px; display: inline-grid; place-items: center; border-radius: 9px; background: #f7f4f1; color: #3e4147; }
 .reason-detail { gap: 15px; min-width: 0; }
 .reason-icon { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 50%; background: #f8f4f0; color: #626872; }

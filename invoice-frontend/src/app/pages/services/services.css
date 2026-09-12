@@ -42,7 +42,24 @@ button:hover:not(:disabled) { transform: translateY(-1px); }
 .primary-button svg { width: 20px; height: 20px; }
 .service-list-card { overflow: hidden; }
 .list-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, .3fr) auto; gap: 24px; padding: 0 24px 14px; border-bottom: 1px solid var(--border); color: #76513a; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.service-row { min-height: 78px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, .3fr) auto; align-items: center; gap: 24px; padding: 14px 24px; border-bottom: 1px solid #eee7e1; }
+.service-row {
+  min-height: 78px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, .3fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #eee7e1;
+  cursor: default;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.service-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  background: #fdfaf4;
+}
 .service-detail { gap: 16px; min-width: 0; }
 .service-icon { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 12px; background: var(--brown-soft); color: var(--brown); }
 .service-icon svg { width: 21px; height: 21px; }
