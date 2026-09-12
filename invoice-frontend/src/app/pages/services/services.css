@@ -11,6 +11,7 @@
 }
 
 * { box-sizing: border-box; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .services-container { width: 100%; min-height: 100%; padding: clamp(18px, 2.4vw, 36px); background: #fbfcfd; color: var(--ink); }
 .page-header, .title-group, .add-service-row, .service-detail, .action-buttons, .pagination, .pagination-footer { display: flex; align-items: center; }
 .page-header { min-height: 92px; justify-content: space-between; gap: 24px; }
@@ -29,6 +30,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .add-service-row { gap: 16px; }
 .service-input { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; }
 .service-input svg { position: absolute; left: 16px; width: 18px; height: 18px; color: #8a929e; }
+.rate-input { flex: 0 1 220px; }
+.currency-prefix { position: absolute; left: 16px; color: #8a929e; font-weight: 700; }
 input { width: 100%; min-width: 0; height: 48px; padding: 0 15px; border: 1px solid #d9dde3; border-radius: 8px; background: #fff; color: var(--ink); font: inherit; outline: none; }
 .service-input input { padding-left: 48px; }
 input:focus { border-color: var(--brown); box-shadow: 0 0 0 3px rgba(154, 94, 50, .11); }
@@ -38,13 +41,15 @@ button:hover:not(:disabled) { transform: translateY(-1px); }
 .primary-button { min-width: 150px; height: 48px; padding: 0 20px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 1px solid var(--brown); background: linear-gradient(135deg, #aa6b3d, #8d4e25); color: #fff; }
 .primary-button svg { width: 20px; height: 20px; }
 .service-list-card { overflow: hidden; }
-.list-columns { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; padding: 0 24px 14px; border-bottom: 1px solid var(--border); color: #76513a; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.service-row { min-height: 78px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 14px 24px; border-bottom: 1px solid #eee7e1; }
+.list-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, .3fr) auto; gap: 24px; padding: 0 24px 14px; border-bottom: 1px solid var(--border); color: #76513a; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.service-row { min-height: 78px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, .3fr) auto; align-items: center; gap: 24px; padding: 14px 24px; border-bottom: 1px solid #eee7e1; }
 .service-detail { gap: 16px; min-width: 0; }
 .service-icon { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 12px; background: var(--brown-soft); color: var(--brown); }
 .service-icon svg { width: 21px; height: 21px; }
 .service-name { min-width: 0; font-size: 15px; overflow-wrap: anywhere; }
+.service-rate { color: var(--brown-dark); font-size: 14px; font-weight: 700; }
 .edit-input { max-width: 420px; height: 42px; }
+.edit-rate { max-width: 150px; }
 .action-buttons { justify-content: flex-end; gap: 10px; }
 .outline-button, .save-button, .delete-button { min-width: 86px; padding: 9px 13px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--border); background: #fff; color: var(--brown-dark); }
 .outline-button svg, .delete-button svg { width: 17px; height: 17px; }
@@ -59,7 +64,7 @@ button:hover:not(:disabled) { transform: translateY(-1px); }
 .state-message { padding: 38px; color: var(--muted); text-align: center; }
 .service-skeleton { padding: 24px; }
 .skeleton-heading { width: 180px; height: 24px; margin-bottom: 20px; }
-.skeleton-table-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 170px; align-items: center; gap: 16px; min-height: 72px; border-bottom: 1px solid #eee7e1; }
+.skeleton-table-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 110px 170px; align-items: center; gap: 16px; min-height: 72px; border-bottom: 1px solid #eee7e1; }
 .skeleton-avatar { width: 44px; height: 44px; border-radius: 12px; }
 
 @media (max-width: 768px) {
@@ -78,10 +83,12 @@ button:hover:not(:disabled) { transform: translateY(-1px); }
   .title-icon svg { width: 25px; height: 25px; }
   .add-service-card, .service-list-card, .state-message { margin-top: 18px; }
   .add-service-row { align-items: stretch; flex-direction: column; }
+  .rate-input { width: 100%; flex-basis: auto; }
   .primary-button { width: 100%; }
   .service-list-card > h2 { padding: 19px 16px 0; }
   .list-columns { display: none; }
   .service-row { grid-template-columns: 1fr; }
+  .service-rate { padding-left: 60px; }
   .action-buttons { justify-content: flex-start; padding-left: 60px; flex-wrap: wrap; }
   .outline-button, .save-button, .delete-button { flex: 1 1 90px; }
   .edit-input { max-width: none; }
@@ -123,6 +130,7 @@ button:hover:not(:disabled) { transform: translateY(-1px); }
 .add-service-row { gap: 12px; }
 input { height: 40px; border-radius: 8px; font-size: 13px; }
 .service-input svg { left: 13px; width: 17px; height: 17px; }
+.currency-prefix { left: 13px; }
 .service-input input { padding-left: 40px; }
 .primary-button { min-width: 132px; height: 40px; min-height: 40px; padding: 0 16px; font-size: 13px; }
 .primary-button svg { width: 17px; height: 17px; }
@@ -132,6 +140,7 @@ input { height: 40px; border-radius: 8px; font-size: 13px; }
 .service-icon { width: 36px; height: 36px; flex-basis: 36px; border-radius: 10px; }
 .service-icon svg { width: 17px; height: 17px; }
 .service-name { font-size: 13px; }
+.service-rate { font-size: 13px; }
 .edit-input { height: 38px; }
 .action-buttons { gap: 8px; }
 .outline-button,
@@ -159,6 +168,7 @@ input { height: 40px; border-radius: 8px; font-size: 13px; }
   .add-service-card { padding: 16px; }
   .service-list-card > h2 { padding: 16px 16px 0; }
   .action-buttons { padding-left: 48px; }
+  .service-rate { padding-left: 48px; }
   .pagination-footer { padding: 14px; }
 }
 
@@ -166,4 +176,5 @@ input { height: 40px; border-radius: 8px; font-size: 13px; }
   .services-container { padding: 8px; }
   .page-header h1 { font-size: 21px; }
   .action-buttons { padding-left: 0; }
+  .service-rate { padding-left: 0; }
 }

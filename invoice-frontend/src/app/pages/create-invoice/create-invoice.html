@@ -94,7 +94,8 @@
         <tbody>
           <tr *ngFor="let service of invoice.services; let i = index; trackBy: trackInvoiceService" class="service-row-item">
             <td data-label="Service Type">
-              <select class="service-select" [(ngModel)]="service.serviceType" required>
+              <select class="service-select" [(ngModel)]="service.serviceType"
+                (ngModelChange)="onServiceTypeChange(service, $event)" required>
                 <option value="" disabled>Select Service</option>
                 <option *ngFor="let serviceType of serviceTypes; trackBy: trackServiceType" [value]="serviceType.name">
                   {{ serviceType.name }}

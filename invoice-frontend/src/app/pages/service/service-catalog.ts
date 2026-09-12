@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment.generated';
 export interface ServiceType {
   _id: string;
   name: string;
+  amount: number;
 }
 
 @Injectable({
@@ -29,12 +30,12 @@ export class ServiceCatalog {
     return this.http.get<ServiceType[]>(this.apiUrl, { headers: this.getHeaders() });
   }
 
-  createService(name: string): Observable<ServiceType> {
-    return this.http.post<ServiceType>(this.apiUrl, { name }, { headers: this.getHeaders() });
+  createService(name: string, amount: number): Observable<ServiceType> {
+    return this.http.post<ServiceType>(this.apiUrl, { name, amount }, { headers: this.getHeaders() });
   }
 
-  updateService(id: string, name: string): Observable<ServiceType> {
-    return this.http.put<ServiceType>(`${this.apiUrl}/${id}`, { name }, { headers: this.getHeaders() });
+  updateService(id: string, name: string, amount: number): Observable<ServiceType> {
+    return this.http.put<ServiceType>(`${this.apiUrl}/${id}`, { name, amount }, { headers: this.getHeaders() });
   }
 
   deleteService(id: string): Observable<{ message: string }> {

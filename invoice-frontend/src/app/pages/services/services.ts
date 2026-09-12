@@ -14,6 +14,7 @@ import { ServiceCatalog, ServiceType } from '../service/service-catalog';
 export class Services implements OnInit {
   services: ServiceType[] = [];
   serviceName = '';
+  serviceAmount: number | null = null;
   editingService: ServiceType | null = null;
   loading = true;
   saving = false;
@@ -52,12 +53,14 @@ export class Services implements OnInit {
 
   addService(): void {
     const name = this.serviceName.trim();
-    if (!name || this.saving) return;
+    const amount = Number(this.serviceAmount);
+    if (!name || this.serviceAmount === null || !Number.isFinite(amount) || amount < 0 || this.saving) return;
 
     this.saving = true;
-    this.serviceCatalog.createService(name).subscribe({
+    this.serviceCatalog.createService(name, amount).subscribe({
       next: () => {
         this.serviceName = '';
+        this.serviceAmount = null;
         this.saving = false;
         this.alertService.success('Service added successfully');
         this.loadServices();
@@ -75,10 +78,11 @@ export class Services implements OnInit {
 
   saveEdit(): void {
     const name = this.editingService?.name.trim();
-    if (!this.editingService || !name || this.saving) return;
+    const amount = Number(this.editingService?.amount ?? 0);
+    if (!this.editingService || !name || !Number.isFinite(amount) || amount < 0 || this.saving) return;
 
     this.saving = true;
-    this.serviceCatalog.updateService(this.editingService._id, name).subscribe({
+    this.serviceCatalog.updateService(this.editingService._id, name, amount).subscribe({
       next: () => {
         this.editingService = null;
         this.saving = false;

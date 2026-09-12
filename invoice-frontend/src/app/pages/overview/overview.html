@@ -116,7 +116,8 @@
         <div class="quick-income-grid">
           <div class="form-group">
             <label>Service Type</label>
-            <select class="service-select" [(ngModel)]="incomeServiceType">
+            <select class="service-select" [(ngModel)]="incomeServiceType"
+              (ngModelChange)="onQuickIncomeServiceChange($event)">
               <option value="">Select Service</option>
               <option *ngFor="let serviceType of serviceTypes; trackBy: trackServiceType" [value]="serviceType.name">
                 {{ serviceType.name }}

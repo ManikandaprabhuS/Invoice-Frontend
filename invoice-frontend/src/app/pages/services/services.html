@@ -22,7 +22,14 @@
         <input id="serviceName" name="serviceName" type="text" [(ngModel)]="serviceName"
           placeholder="Enter service name" required />
       </label>
-      <button class="primary-button" type="submit" [disabled]="!serviceName.trim() || saving">
+      <label class="service-input rate-input" for="serviceAmount">
+        <span class="currency-prefix" aria-hidden="true">₹</span>
+        <span class="sr-only">Service amount</span>
+        <input id="serviceAmount" name="serviceAmount" type="number" [(ngModel)]="serviceAmount"
+          placeholder="Enter amount" min="0" step="0.01" required />
+      </label>
+      <button class="primary-button" type="submit"
+        [disabled]="!serviceName.trim() || serviceAmount === null || serviceAmount < 0 || saving">
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         {{ saving ? 'Saving...' : 'Add Service' }}
       </button>
@@ -40,7 +47,7 @@
 
   <section class="service-list-card" *ngIf="!loading && services.length" aria-labelledby="allServicesHeading">
     <h2 id="allServicesHeading">All Services</h2>
-    <div class="list-columns" aria-hidden="true"><span>Service Name</span><span>Actions</span></div>
+    <div class="list-columns" aria-hidden="true"><span>Service Name</span><span>Amount</span><span>Actions</span></div>
     <div class="service-list">
       <article class="service-row" *ngFor="let service of paginatedServices; trackBy: trackService">
         <div class="service-detail">
@@ -51,12 +58,19 @@
           <input class="edit-input" *ngIf="editingService?._id === service._id" [(ngModel)]="editingService!.name"
             [ngModelOptions]="{standalone: true}" aria-label="Edit service name" />
         </div>
+        <div class="service-rate">
+          <span *ngIf="editingService?._id !== service._id">₹ {{ (service.amount || 0) | number:'1.2-2' }}</span>
+          <input class="edit-input edit-rate" type="number" *ngIf="editingService?._id === service._id"
+            [(ngModel)]="editingService!.amount" [ngModelOptions]="{standalone: true}"
+            aria-label="Edit service amount" min="0" step="0.01" />
+        </div>
         <div class="action-buttons">
           <button type="button" class="outline-button" *ngIf="editingService?._id !== service._id" (click)="editService(service)">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 16-1 5 5-1L19 9l-4-4Z"/><path d="m13 7 4 4"/></svg> Edit
           </button>
           <button type="button" class="save-button" *ngIf="editingService?._id === service._id"
-            [disabled]="!editingService!.name.trim() || saving" (click)="saveEdit()">Save</button>
+            [disabled]="!editingService!.name.trim() || editingService!.amount < 0 || saving"
+            (click)="saveEdit()">Save</button>
           <button type="button" class="outline-button" *ngIf="editingService?._id === service._id" (click)="cancelEdit()">Cancel</button>
           <button type="button" class="delete-button" *ngIf="editingService?._id !== service._id" (click)="deleteService(service)">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg> Delete

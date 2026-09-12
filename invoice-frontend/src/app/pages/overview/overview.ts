@@ -81,6 +81,13 @@ export class Overview implements OnInit, OnDestroy {
     });
   }
 
+  onQuickIncomeServiceChange(serviceName: string): void {
+    const selectedService = this.serviceTypes.find(service => service.name === serviceName);
+    this.incomeAmount = selectedService && Number.isFinite(Number(selectedService.amount))
+      ? Number(selectedService.amount)
+      : 0;
+  }
+
 
   // ================= EXISTING METHOD (UNCHANGED LOGIC) =================
   async loadDashboardData() {

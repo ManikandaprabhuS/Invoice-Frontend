@@ -7,6 +7,14 @@ import { AlertService } from '../service/alert.service';
 import { ServiceCatalog, ServiceType } from '../service/service-catalog';
 import { Client } from '../service/client';
 
+interface InvoiceServiceLine {
+  serviceType: string;
+  quantity: number;
+  pricePerUnit: number;
+  amountCharged: number;
+  notes: string;
+}
+
 @Component({
   selector: 'app-create-invoice',
   standalone: true,                // ✅ REQUIRED
@@ -97,6 +105,15 @@ export class CreateInvoice implements OnInit, OnDestroy {
 
   removeService(index: number) {
     this.invoice.services.splice(index, 1);
+    this.recalculate();
+  }
+
+  onServiceTypeChange(service: InvoiceServiceLine, serviceName: string): void {
+    service.serviceType = serviceName;
+    const selectedService = this.serviceTypes.find(item => item.name === serviceName);
+    service.pricePerUnit = selectedService && Number.isFinite(Number(selectedService.amount))
+      ? Number(selectedService.amount)
+      : 0;
     this.recalculate();
   }
 
