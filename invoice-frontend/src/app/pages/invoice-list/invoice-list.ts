@@ -438,7 +438,7 @@ export class InvoiceList implements OnInit {
       'Customer Invoice Report',
       ['ID', 'Customer', 'Service', 'Amount', 'Payment', 'Date'],
       this.filteredCustomerInvoices.map(invoice => [
-        invoice._id,
+        this.getReportId(invoice._id),
         invoice.clientName,
         invoice.serviceType,
         `INR ${Number(invoice.amount || 0).toFixed(2)}`,
@@ -459,7 +459,7 @@ export class InvoiceList implements OnInit {
       'Business Invoice Report',
       ['ID', 'Client', 'Phone', 'Total', 'Paid', 'Balance', 'Date'],
       this.filteredInvoices.map(invoice => [
-        invoice._id,
+        this.getReportId(invoice._id),
         invoice.userName,
         invoice.phoneNumber,
         `INR ${Number(invoice.totalAmount || 0).toFixed(2)}`,
@@ -527,6 +527,11 @@ export class InvoiceList implements OnInit {
     }
 
     pdf.save(`${filename}-${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
+
+  private getReportId(id: unknown): string {
+    const normalizedId = String(id ?? '').replace(/[^a-z0-9]/gi, '');
+    return normalizedId ? normalizedId.slice(-4).toUpperCase().padStart(4, '0') : '—';
   }
 
   calculateBalance(invoice: any): number {
