@@ -31,8 +31,13 @@ export class InvoiceList implements OnInit {
 
   searchTerm = '';
   customerPaymentFilter: '' | 'Online' | 'Cash' = '';
-  customerDateFilter = '';
+  customerFromDate = '';
+  customerEndDate = '';
   showCustomerFilters = false;
+  businessPaymentFilter: '' | 'Online' | 'Cash' = '';
+  businessFromDate = '';
+  businessEndDate = '';
+  showBusinessFilters = false;
   mobileInvoiceSection: 'customer' | 'business' = 'customer';
   selectedCount = 0;
   editingInvoice: any = null;
@@ -105,11 +110,19 @@ export class InvoiceList implements OnInit {
 
   applyFilter() {
     const term = this.searchTerm.trim().toLowerCase();
-    this.filteredInvoices = this.invoices.filter(inv =>
-      String(inv.userName || '').toLowerCase().includes(term) ||
-      String(inv.phoneNumber || '').toLowerCase().includes(term) ||
-      String(inv._id || '').toLowerCase().includes(term)
-    );
+    this.filteredInvoices = this.invoices.filter(inv => {
+      const matchesSearch = String(inv.userName || '').toLowerCase().includes(term) ||
+        String(inv.phoneNumber || '').toLowerCase().includes(term) ||
+        String(inv._id || '').toLowerCase().includes(term);
+      const matchesPayment = !this.businessPaymentFilter ||
+        inv.modeOfPayment === this.businessPaymentFilter;
+      const matchesDateRange = this.matchesDateRange(
+        inv.createdAt,
+        this.businessFromDate,
+        this.businessEndDate
+      );
+      return matchesSearch && matchesPayment && matchesDateRange;
+    });
     this.calculatePagination();
   }
 
@@ -117,17 +130,29 @@ export class InvoiceList implements OnInit {
     this.filteredCustomerInvoices = this.customerInvoices.filter(invoice => {
       const matchesPayment = !this.customerPaymentFilter ||
         invoice.modeOfPayment === this.customerPaymentFilter;
-      const matchesDate = !this.customerDateFilter ||
-        this.formatLocalDateKey(invoice.createdAt) === this.customerDateFilter;
-      return matchesPayment && matchesDate;
+      const matchesDateRange = this.matchesDateRange(
+        invoice.createdAt,
+        this.customerFromDate,
+        this.customerEndDate
+      );
+      return matchesPayment && matchesDateRange;
     });
     this.calculateCustomerPagination();
   }
 
   clearCustomerFilters() {
     this.customerPaymentFilter = '';
-    this.customerDateFilter = '';
+    this.customerFromDate = '';
+    this.customerEndDate = '';
     this.applyCustomerFilter();
+  }
+
+  clearBusinessFilters() {
+    this.searchTerm = '';
+    this.businessPaymentFilter = '';
+    this.businessFromDate = '';
+    this.businessEndDate = '';
+    this.applyFilter();
   }
 
   calculatePagination() {
@@ -395,6 +420,12 @@ export class InvoiceList implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private matchesDateRange(value: string, fromDate: string, endDate: string): boolean {
+    const dateKey = this.formatLocalDateKey(value);
+    if (!dateKey) return false;
+    return (!fromDate || dateKey >= fromDate) && (!endDate || dateKey <= endDate);
   }
 
   generateCustomerReport() {

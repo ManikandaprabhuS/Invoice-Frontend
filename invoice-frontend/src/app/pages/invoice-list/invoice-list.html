@@ -45,8 +45,12 @@
           </select>
         </label>
         <label>
-          <span>Date</span>
-          <input type="date" [(ngModel)]="customerDateFilter" (ngModelChange)="applyCustomerFilter()" />
+          <span>From Date</span>
+          <input type="date" [(ngModel)]="customerFromDate" (ngModelChange)="applyCustomerFilter()" />
+        </label>
+        <label>
+          <span>End Date</span>
+          <input type="date" [(ngModel)]="customerEndDate" (ngModelChange)="applyCustomerFilter()" />
         </label>
         <button class="clear-filter-btn" type="button" (click)="clearCustomerFilters()">Clear Filters</button>
       </div>
@@ -140,6 +144,11 @@
           <p>Invoices created from the business invoice form</p>
         </div>
         <div class="section-actions">
+          <button class="filter-toggle-btn" type="button" [attr.aria-expanded]="showBusinessFilters"
+            (click)="showBusinessFilters = !showBusinessFilters">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+            Filter
+          </button>
           <label class="search-field">
             <span class="sr-only">Search business invoices</span>
             <input class="table-filter business-table-filter" placeholder="Search with Client Name or Phone Number."
@@ -151,6 +160,26 @@
             Generate Report
           </button>
         </div>
+      </div>
+
+      <div class="customer-filter-panel" *ngIf="showBusinessFilters">
+        <label>
+          <span>Mode of Payment</span>
+          <select [(ngModel)]="businessPaymentFilter" (ngModelChange)="applyFilter()">
+            <option value="">All Payments</option>
+            <option value="Online">Online</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </label>
+        <label>
+          <span>From Date</span>
+          <input type="date" [(ngModel)]="businessFromDate" (ngModelChange)="applyFilter()" />
+        </label>
+        <label>
+          <span>End Date</span>
+          <input type="date" [(ngModel)]="businessEndDate" (ngModelChange)="applyFilter()" />
+        </label>
+        <button class="clear-filter-btn" type="button" (click)="clearBusinessFilters()">Clear Filters</button>
       </div>
 
       <div class="skeleton-table-list" *ngIf="loadingInvoices" aria-label="Loading business invoices">
